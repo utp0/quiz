@@ -3,15 +3,12 @@
   "version": "0.0.1",
   "main": "index.js",
   "scripts": {
-    "ng": "cd ./angular-project && ng",
-    "start:ng": "cd ./angular-project && ng serve",
+    "test": "echo Nincs teszt. && exit 1",
     "start:server": "node index.js",
     "start:server:watch": "nodemon index.js",
-    "build": "cd ./angular-project && ng build",
-    "watch": "cd ./angular-project && ng build --watch --configuration development",
-    "test": "cd ./angular-project && ng test",
-    "dev": "concurrently \"npm run start:ng\" \"npm run start:server\"",
-    "mon": "concurrently \"npm run start:ng\" \"npm run start:server:watch\""
+    "dev": "npm run start:server",
+    "start": "npm run dev",
+    "mon": "npm run start:server:watch"
   },
   "repository": {
     "type": "git",
@@ -25,12 +22,10 @@
   "homepage": "https://github.com/utp0/quiz#readme",
   "description": "",
   "dependencies": {
-    "concurrently": "^9.1.2",
-    "express": "^5.1.0",
-    "http-proxy-middleware": "^3.0.5"
+    "ejs": "^3.1.10",
+    "express": "^5.1.0"
   },
   "devDependencies": {
-    "@angular/cli": "^19.2.8",
     "nodemon": "^3.1.9"
   }
 }

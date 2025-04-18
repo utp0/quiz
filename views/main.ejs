@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>
+        <%= locals.title ?? "Quiz" %>
+    </title>
+    <link rel="stylesheet" href="index.css" />
+</head>
+
+<%
+try {
+    %><%- include(locals.page) %><%
+} catch (error) {
+    console.error(`A(z) "${locals.page} oldal betöltése sikertelen."\n`, error);
+    %><p><%= `Error loading page "${locals.page}"` %></p><%
+}
+%>
+
+
+</html>
