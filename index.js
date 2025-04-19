@@ -1,5 +1,16 @@
 const express = require("express");
 const path = require('path');
+const oracledb = require("oracledb");
+
+// Oracledb beállítása
+const _dbInstance = require("./dbInstance");
+_dbInstance.openDB().then(async () => {
+    console.log("Adatbázis kapcsolat létrejött!");
+    process.addListener("SIGINT", () => {
+        _dbInstance.getInstance().close().catch(() => {});
+    })
+});
+
 
 const app = express();
 
@@ -28,6 +39,5 @@ app.get("/", (req, res) => {
 app.use(express.static(path.join(__dirname, "public")));
 
 app.listen(PORT, () => {
-    console.log(`Express: http://127.0.0.1:${PORT}/\n
-        `);
+    console.log(`Express: http://127.0.0.1:${PORT}/\n`);
 })
