@@ -7,7 +7,7 @@ const _dbInstance = require("./dbInstance");
 _dbInstance.openDB().then(async () => {
     console.log("Adatbázis kapcsolat létrejött!");
     process.addListener("SIGINT", () => {
-        _dbInstance.getInstance().close().catch(() => {});
+        _dbInstance.getInstance().close().catch(() => { });
     })
 });
 
@@ -23,20 +23,7 @@ app.set("view options", {
 });
 app.set("views", path.join(__dirname, "views"));
 
-// teszt
-app.get("/api/ping", (req, res) => {
-    res.json({ message: "pong" });
-})
-
-app.get("/", (req, res) => {
-    res.render("main", {
-        page: "partial/homepage",  // ez lenne pl "kerdessor" vagy "quizlista", amik pl a views/partial mappában lennének
-        title: "Quiz - Főoldal",
-        tesztvaltozo: "értékátadás ok"
-    });
-});
-
-app.use(express.static(path.join(__dirname, "public")));
+app.use(require("./appRoutes"));
 
 app.listen(PORT, () => {
     console.log(`Express: http://127.0.0.1:${PORT}/\n`);
