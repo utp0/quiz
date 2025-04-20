@@ -1,5 +1,6 @@
 {
   "name": "quiz",
+  "type": "commonjs",
   "version": "0.0.1",
   "main": "index.js",
   "scripts": {
@@ -22,8 +23,10 @@
   "homepage": "https://github.com/utp0/quiz#readme",
   "description": "",
   "dependencies": {
+    "dotenv": "^16.5.0",
     "ejs": "^3.1.10",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "oracledb": "^6.8.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"

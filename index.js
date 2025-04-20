@@ -2,6 +2,17 @@ const express = require("express");
 const oracledb = require('oracledb');
 const bcrypt = require('bcrypt');
 const path = require('path');
+const oracledb = require("oracledb");
+
+// Oracledb beállítása
+const _dbInstance = require("./dbInstance");
+_dbInstance.openDB().then(async () => {
+    console.log("Adatbázis kapcsolat létrejött!");
+    process.addListener("SIGINT", () => {
+        _dbInstance.getInstance().close().catch(() => { });
+    })
+});
+
 
 const app = express();
 
@@ -14,23 +25,8 @@ app.set("view options", {
 });
 app.set("views", path.join(__dirname, "views"));
 
-// teszt
-app.get("/api/ping", (req, res) => {
-    res.json({ message: "pong" });
-})
-
-app.get("/register", (req, res) => {
-  res.render("main", {
-      page: "partial/register",
-      title: "Regisztráció",
-  });
-});
-
-
-
-app.use(express.static(path.join(__dirname, "public")));
+app.use(require("./appRoutes"));
 
 app.listen(PORT, () => {
-    console.log(`Express: http://127.0.0.1:${PORT}/\n
-        `);
+    console.log(`Express: http://127.0.0.1:${PORT}/\n`);
 })
