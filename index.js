@@ -1,6 +1,4 @@
 const express = require("express");
-const oracledb = require('oracledb');
-const bcrypt = require('bcrypt');
 const path = require('path');
 const oracledb = require("oracledb");
 
@@ -24,6 +22,8 @@ app.set("view options", {
     async: false,
 });
 app.set("views", path.join(__dirname, "views"));
+
+app.use(express.static(path.join(__dirname, "public")));
 
 app.use(require("./appRoutes"));
 

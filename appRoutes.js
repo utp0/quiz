@@ -7,14 +7,20 @@ app.get("/api/ping", (req, res) => {
     res.json({ message: "pong" });
 })
 
-app.get("/", (req, res) => {
+app.get("/register", (req, res) => {
     res.render("main", {
-        page: "partial/homepage",  // ez lenne pl "kerdessor" vagy "quizlista", amik pl a views/partial mappában lennének
-        title: "Quiz - Főoldal",
-        tesztvaltozo: "értékátadás ok"
+        page: "partial/register",  
+        title: "Regisztráció",
     });
 });
 
-app.use(express.static(path.join(__dirname, "public")));
+app.get("/login", (req, res) => {
+    res.render("main", {
+        page: "partial/login",  
+        title: "Bejelentkezés",
+    });
+});
+
+
 
 module.exports = app;
