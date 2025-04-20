@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo Nincs teszt. && exit 1",
     "start:server": "node index.js",
-    "start:server:watch": "nodemon index.js",
+    "start:server:watch": "nodemon -e js,ts index.js",
     "dev": "npm run start:server",
     "start": "npm run dev",
     "mon": "npm run start:server:watch"
@@ -23,6 +23,7 @@
   "homepage": "https://github.com/utp0/quiz#readme",
   "description": "",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "dotenv": "^16.5.0",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
