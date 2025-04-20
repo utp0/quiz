@@ -6,7 +6,8 @@ const config = {
     user: process.env.DBUSER,
     password: process.env.DBPASS,
     connectString: process.env.DBCONNSTR,
-    autoCommit: true
+    autoCommit: true,
+    outFormat: oracledb.OUT_FORMAT_OBJECT
 };
 
 class DatabaseInstance {

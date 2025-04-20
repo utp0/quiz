@@ -6,9 +6,6 @@ const oracledb = require("oracledb");
 const _dbInstance = require("./dbInstance");
 _dbInstance.openDB().then(async () => {
     console.log("Adatbázis kapcsolat létrejött!");
-    process.addListener("SIGINT", () => {
-        _dbInstance.getInstance().close().catch(() => { });
-    })
 });
 
 
