@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="hu">
 
 <head>
     <title>
         <%= locals.title ?? "Quiz" %>
     </title>
-    <link rel="stylesheet" href="index.css" />
+    <link rel="stylesheet" href="style.css" />
 </head>
 
 <%
 try {
-    %><%- include(locals.page) %><%
+  %><%- include(locals.page) %><%
 } catch (error) {
-    console.error(`A(z) "${locals.page} oldal betöltése sikertelen."\n`, error);
+  console.error(`A(z) "${locals.page} oldal betöltése sikertelen."\n`, error);
     %><p><%= `Error loading page "${locals.page}"` %></p><%
 }
 %>
