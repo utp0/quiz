@@ -137,3 +137,6 @@ dist
 
 # tokenek
 tokens.json
+
+# .vscode mappa (settings.json 2 szóközös ident)
+.vscode/
