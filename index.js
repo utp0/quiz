@@ -1,4 +1,6 @@
 const express = require("express");
+const oracledb = require('oracledb');
+const bcrypt = require('bcrypt');
 const path = require('path');
 
 const app = express();
@@ -17,17 +19,14 @@ app.get("/api/ping", (req, res) => {
     res.json({ message: "pong" });
 })
 
-app.get('/register', (req, res) => {
-    res.render('register'); 
+app.get("/register", (req, res) => {
+  res.render("main", {
+      page: "partial/register",
+      title: "Regisztráció",
+  });
 });
 
-app.get("/", (req, res) => {
-    res.render("main", {
-        page: "partial/homepage",  // ez lenne pl "kerdessor" vagy "quizlista", amik pl a views/partial mappában lennének
-        title: "Quiz - Főoldal",
-        tesztvaltozo: "értékátadás ok"
-    });
-});
+
 
 app.use(express.static(path.join(__dirname, "public")));
 
