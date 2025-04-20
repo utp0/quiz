@@ -10,11 +10,16 @@ const { registerUser, loginToken, verifyToken, getUserById } = require("./dbFunc
 
 app.use(async (req, res, next) => {
     const tokenCookie = req.cookies["token"] ?? null;
-    const userId = await verifyToken(tokenCookie);
-    let user = await getUserById(userId);
-    if (user != null) {
-        user["JELSZO"] = "";
-        res.locals.currentUser = user;
+    if (tokenCookie !== null) {
+        const userId = await verifyToken(tokenCookie);
+        let user = await getUserById(userId);
+        if (user == null) {
+            // töröljük a sütit ha amúgy is invalid
+            res.clearCookie("token");
+        } else {
+            user["JELSZO"] = "";
+            res.locals.currentUser = user;
+        }
     }
     next()
 })

@@ -119,6 +119,7 @@ class DbFunctions {
     }
 
     static async getUserById(userId) {
+        if(userId === false) return null;  // kliens süti nélkül ne próbáljuk
         const sql = `SELECT * FROM FELHASZNALO WHERE ID = :1`;
         let ret = [];
         try {
@@ -129,7 +130,7 @@ class DbFunctions {
                 outFormat: oracledb.OUT_FORMAT_OBJECT
             });
         } catch (e) {
-            console.error(`Hiba felhasználó id alapján lekérése közben (${userId}), e`);
+            console.error(`Hiba felhasználó id alapján lekérése közben (${userId})`, e);
         }
         if (!ret.rows || ret.rows.length == 0 || ret.rows.length > 1) {
             return null;  // vagy nincs, vagy több van (unique miatt nem lehet)
