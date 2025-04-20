@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="hu">
 
 <head>
     <title>
@@ -10,9 +10,9 @@
 
 <%
 try {
-    %><%- include(locals.page) %><%
+  %><%- include(locals.page) %><%
 } catch (error) {
-    console.error(`A(z) "${locals.page} oldal betöltése sikertelen."\n`, error);
+  console.error(`A(z) "${locals.page} oldal betöltése sikertelen."\n`, error);
     %><p><%= `Error loading page "${locals.page}"` %></p><%
 }
 %>
