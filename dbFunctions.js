@@ -136,6 +136,53 @@ class DbFunctions {
         }
         return ret.rows[0];
     }
+
+    static async getAllTemakor() {
+        const connection = await _dbInstance.getConnection();
+        try {
+            const result = await connection.execute(
+                `SELECT id, nev FROM Temakor ORDER BY nev`,
+                [],
+                { outFormat: oracledb.OUT_FORMAT_OBJECT }
+            );
+            return result.rows;
+        } finally {
+            if (connection) {
+                try {
+                    await connection.close();
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+        }
+    }
+
+    static async createTemakor(nev) {
+        const connection = await _dbInstance.getConnection();
+        try {
+            const maxIdResult = await connection.execute(
+                `SELECT NVL(MAX(id), 0) + 1 as next_id FROM Temakor`,
+                [],
+                { outFormat: oracledb.OUT_FORMAT_OBJECT }
+            );
+            
+            const nextId = maxIdResult.rows[0].NEXT_ID;
+            
+            await connection.execute(
+                `INSERT INTO Temakor (id, nev) VALUES (:id, :nev)`,
+                { id: nextId, nev: nev },
+                { autoCommit: true }
+            );
+        } finally {
+            if (connection) {
+                try {
+                    await connection.close();
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+        }
+    }
 }
 
 module.exports = DbFunctions;

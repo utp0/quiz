@@ -1,5 +1,3 @@
-<% include ../layouts/layout.ejs %>
-
 <h2>Témakörök</h2>
 
 <a href="/tema/new">+ Új témakör hozzáadása</a>
@@ -7,23 +5,27 @@
 <table>
     <thead>
         <tr>
-            <th>ID</th>
             <th>Név</th>
             <th>Műveletek</th>
         </tr>
     </thead>
     <tbody>
-        <% temakorok.forEach(t => { %>
+        <% if (locals.temakorok && locals.temakorok.length > 0) { %>
+            <% locals.temakorok.forEach(t => { %>
+                <tr>
+                    <td><%= t.nev %></td>
+                    <td>
+                        <a href="/tema/<%= t.id %>/edit">Szerkesztés</a>
+                        <form action="/tema/<%= t.id %>?_method=DELETE" method="POST" style="display:inline;">
+                            <button type="submit">Törlés</button>
+                        </form>
+                    </td>
+                </tr>
+            <% }) %>
+        <% } else { %>
             <tr>
-                <td><%= t.id %></td>
-                <td><%= t.nev %></td>
-                <td>
-                    <a href="/tema/<%= t.id %>/edit">Szerkesztés</a>
-                    <form action="/tema/<%= t.id %>?_method=DELETE" method="POST" style="display:inline;">
-                        <button type="submit">Törlés</button>
-                    </form>
-                </td>
+                <td colspan="2">Nincsenek témakörök</td>
             </tr>
-        <% }) %>
+        <% } %>
     </tbody>
 </table>

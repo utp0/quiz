@@ -1,10 +1,16 @@
-<% include ../layouts/layout.ejs %>
-
 <h2>Új témakör hozzáadása</h2>
 
-<form action="/tema" method="POST">
-    <label for="nev">Témakör neve:</label>
-    <input type="text" id="nev" name="nev" required>
+<form action="/tema" method="POST" class="tema-form">
+    <div class="form-group">
+        <label for="nev">Témakör neve:</label>
+        <input type="text" id="nev" name="nev" required>
+        <% if (locals.error) { %>
+            <p class="error-message"><%= locals.error %></p>
+        <% } %>
+    </div>
     
-    <button type="submit">Mentés</button>
+    <div class="button-group">
+        <button type="submit" class="submit-btn">Mentés</button>
+        <a href="/tema" class="cancel-btn">Mégsem</a>
+    </div>
 </form>

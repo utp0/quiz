@@ -76,7 +76,59 @@ app.post("/login", async (req, res) => {
     const strToken = (await loginToken(username, pass)).token;
     res.cookie("token", strToken ?? "");
     res.redirect("/");
-})
+});
+
+app.get("/tema", async (req, res) => {
+    try {
+        const temakorok = await getAllTemakor();
+        
+        res.render("main", {
+            page: "tema/list",
+            title: "Témakörök",
+            temakorok: temakorok
+        });
+    } catch (error) {
+        console.error("Hiba a témakörök lekérdezésénél:", error);
+        res.status(500).send("Hiba történt a témakörök lekérdezésénél.");
+    }
+});
+
+app.get("/tema/new", (req, res) => {
+    res.render("main", {
+        page: "tema/new",
+        title: "Új témakör",
+    });
+});
+
+app.post("/tema", async (req, res) => {
+    const nev = req.body.nev?.trim();
+    
+    if (!nev || nev.length === 0) {
+        return res.render("main", {
+            page: "tema/new",
+            title: "Új témakör",
+            error: "A témakör neve nem lehet üres!"
+        });
+    }
+    
+    try {
+        await createTemakor(nev);
+        res.redirect("/tema");
+    } catch (error) {
+        console.error("Hiba a témakör létrehozásakor:", error);
+        
+        let errorMessage = "Hiba történt a témakör létrehozásakor.";
+        if (error.message && error.message.includes("UNIQUE")) {
+            errorMessage = "Már létezik ilyen nevű témakör!";
+        }
+        
+        res.render("main", {
+            page: "tema/new",
+            title: "Új témakör",
+            error: errorMessage
+        });
+    }
+});
 
 
 
