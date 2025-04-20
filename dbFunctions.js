@@ -138,49 +138,37 @@ class DbFunctions {
     }
 
     static async getAllTemakor() {
-        const connection = await _dbInstance.getConnection();
+        const sql = `SELECT id, nev FROM Temakor ORDER BY nev`;
         try {
-            const result = await connection.execute(
-                `SELECT id, nev FROM Temakor ORDER BY nev`,
-                [],
-                { outFormat: oracledb.OUT_FORMAT_OBJECT }
-            );
-            return result.rows;
-        } finally {
-            if (connection) {
-                try {
-                    await connection.close();
-                } catch (err) {
-                    console.error(err);
-                }
-            }
+            const result = await DbFunctions.dbInstance().execute(sql, []);
+            return result.rows.map(row => ({ id: row[0], nev: row[1] }));
+        } catch (e) {
+            console.error("Hiba a témakörök lekérdezésénél:", e);
+            throw e;
         }
     }
-
+    
     static async createTemakor(nev) {
-        const connection = await _dbInstance.getConnection();
+        const checkSql = `SELECT COUNT(*) FROM Temakor WHERE nev = :1`;
         try {
-            const maxIdResult = await connection.execute(
-                `SELECT NVL(MAX(id), 0) + 1 as next_id FROM Temakor`,
-                [],
-                { outFormat: oracledb.OUT_FORMAT_OBJECT }
-            );
-            
-            const nextId = maxIdResult.rows[0].NEXT_ID;
-            
-            await connection.execute(
-                `INSERT INTO Temakor (id, nev) VALUES (:id, :nev)`,
-                { id: nextId, nev: nev },
-                { autoCommit: true }
-            );
-        } finally {
-            if (connection) {
-                try {
-                    await connection.close();
-                } catch (err) {
-                    console.error(err);
-                }
+            const checkResult = await DbFunctions.dbInstance().execute(checkSql, [nev]);
+            if (checkResult.rows[0][0] > 0) {
+                throw new Error("Már létezik ilyen nevű témakör!");
             }
+            
+            const idSql = `SELECT NVL(MAX(id), 0) + 1 FROM Temakor`;
+            const idResult = await DbFunctions.dbInstance().execute(idSql, []);
+            const nextId = idResult.rows[0][0];
+            
+            const insertSql = `INSERT INTO Temakor (id, nev) VALUES (:1, :2)`;
+            await DbFunctions.dbInstance().execute(insertSql, [nextId, nev]);
+            await DbFunctions.dbInstance().commit();
+            
+            console.log(`Új témakör létrehozva: ${nev} (ID: ${nextId})`);
+            return nextId;
+        } catch (e) {
+            console.error("Hiba a témakör létrehozásakor:", e);
+            throw e;
         }
     }
 }

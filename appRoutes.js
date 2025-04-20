@@ -6,7 +6,7 @@ const express = require("express");
  */
 const app = new express.Router();
 
-const { registerUser, loginToken, verifyToken, getUserById } = require("./dbFunctions");
+const { registerUser, loginToken, verifyToken, getUserById, getAllTemakor, createTemakor  } = require("./dbFunctions");
 
 app.use(async (req, res, next) => {
     const tokenCookie = req.cookies["token"] ?? null;
@@ -96,7 +96,7 @@ app.get("/tema", async (req, res) => {
 app.get("/tema/new", (req, res) => {
     res.render("main", {
         page: "tema/new",
-        title: "Új témakör",
+        title: "Új témakör"
     });
 });
 
@@ -115,21 +115,13 @@ app.post("/tema", async (req, res) => {
         await createTemakor(nev);
         res.redirect("/tema");
     } catch (error) {
-        console.error("Hiba a témakör létrehozásakor:", error);
-        
-        let errorMessage = "Hiba történt a témakör létrehozásakor.";
-        if (error.message && error.message.includes("UNIQUE")) {
-            errorMessage = "Már létezik ilyen nevű témakör!";
-        }
-        
         res.render("main", {
             page: "tema/new",
             title: "Új témakör",
-            error: errorMessage
+            error: error.message || "Hiba történt a témakör létrehozásakor."
         });
     }
 });
-
 
 
 module.exports = app;
