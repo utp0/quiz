@@ -1,0 +1,10 @@
+<% include ../layouts/layout.ejs %>
+
+<h2>Témakör szerkesztése</h2>
+
+<form action="/tema/<%= temakor.id %>?_method=PUT" method="POST">
+    <label for="nev">Témakör neve:</label>
+    <input type="text" id="nev" name="nev" value="<%= temakor.nev %>" required>
+    
+    <button type="submit">Mentés</button>
+</form>

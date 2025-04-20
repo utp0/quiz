@@ -1,0 +1,10 @@
+<% include ../layouts/layout.ejs %>
+
+<h2>Új témakör hozzáadása</h2>
+
+<form action="/tema" method="POST">
+    <label for="nev">Témakör neve:</label>
+    <input type="text" id="nev" name="nev" required>
+    
+    <button type="submit">Mentés</button>
+</form>

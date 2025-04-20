@@ -63,7 +63,7 @@ class DbFunctions {
             allTokens = JSON.parse(allTokens);
             allTokens.push({
                 userId: authedUser["ID"],
-                token: bcrypt.hashSync("" + authedUser["ID"] + Date.now().toString() + Math.random().toString());
+                token: bcrypt.hashSync("" + authedUser["ID"] + Date.now().toString() + Math.random().toString())
             });
             allTokens = JSON.stringify(allTokens, space = 2);
 

@@ -1,21 +1,34 @@
 <!DOCTYPE html>
 <html lang="hu">
-
 <head>
-    <title>
-        <%= locals.title ?? "Quiz" %>
-    </title>
-    <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <title><%= locals.title ?? "Quiz" %></title>
+    <link rel="stylesheet" href="/style.css" />
 </head>
+<body>
+    <header>
+        <h1>Kvíz alkalmazás</h1>
+        <nav>
+            <a href="/">Kezdőlap</a> |
+            <a href="/tema">Témakörök</a> |
+            <a href="/login">Bejelentkezés</a> |
+            <a href="/register">Regisztráció</a>
+        </nav>
+        <hr>
+    </header>
 
-<%
-try {
-  %><%- include(locals.page) %><%
-} catch (error) {
-  console.error(`A(z) "${locals.page} oldal betöltése sikertelen."\n`, error);
-    %><p><%= `Error loading page "${locals.page}"` %></p><%
-}
-%>
+    <main>
+        <% try { %>
+            <%- include(locals.page) %>
+        <% } catch (error) { %>
+            <p style="color:red;"><%= `Hiba az oldal betöltésekor: ${locals.page}` %></p>
+            <pre><%= error.message %></pre>
+        <% } %>
+    </main>
 
-
+    <footer>
+        <hr>
+        <p>&copy; 2025 Kvíz App</p>
+    </footer>
+</body>
 </html>
