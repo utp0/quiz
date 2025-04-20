@@ -43,7 +43,7 @@ class DbFunctions {
                 outFormat: oracledb.OUT_FORMAT_OBJECT
             });
         } catch (e) {
-
+            console.error(e);
         }
         if (ret.rows.length == 0 || ret.rows.length > 1) {
             return null;  // vagy nincs, vagy több van (unique miatt nem lehet)
@@ -76,10 +76,10 @@ class DbFunctions {
             allTokens = JSON.parse(allTokens);
             currentToken = {
                 userId: authedUser["ID"],
-                token: bcrypt.hashSync("" + authedUser["ID"] + Date.now().toString() + Math.random().toString(), 10)
+                token: btoa(bcrypt.hashSync("" + authedUser["ID"] + Date.now().toString() + Math.random().toString(), 10))
             };
             allTokens.push(currentToken);
-            allTokens = JSON.stringify(allTokens);
+            allTokens = JSON.stringify(allTokens, null, 2);
         } catch (e) {
             console.error("Tokenek betöltése/mentése nem sikerült, mind törölve.", e);
             allTokens = "[]";
@@ -91,7 +91,12 @@ class DbFunctions {
         return currentToken;
     }
 
-    static async verifyToken(userId, token) {
+    /**
+     * 
+     * @param {string} token 
+     * @returns {Promise<number|false>} userId vagy hamis
+     */
+    static async verifyToken(token) {
         /**
          * @type {Array}
          */
@@ -102,17 +107,34 @@ class DbFunctions {
             });
             allTokens = JSON.parse(allTokens);
         } catch (e) {
-
+            console.error("Tokenek beolvasása nem sikerült!", e);
         }
         let correct = false;
         allTokens.forEach(pair => {
-            if (pair["userId"] == userId) {
-                if (pair["token"] == token) {
-                    correct = true;
-                }
+            if (pair["token"] == token) {
+                correct = pair["userId"];
             }
         })
         return correct;
+    }
+
+    static async getUserById(userId) {
+        const sql = `SELECT * FROM FELHASZNALO WHERE ID = :1`;
+        let ret = [];
+        try {
+            ret = await DbFunctions.dbInstance().execute(sql, [
+                userId
+            ], {
+                maxRows: 2,
+                outFormat: oracledb.OUT_FORMAT_OBJECT
+            });
+        } catch (e) {
+            console.error(`Hiba felhasználó id alapján lekérése közben (${userId}), e`);
+        }
+        if (!ret.rows || ret.rows.length == 0 || ret.rows.length > 1) {
+            return null;  // vagy nincs, vagy több van (unique miatt nem lehet)
+        }
+        return ret.rows[0];
     }
 }
 
