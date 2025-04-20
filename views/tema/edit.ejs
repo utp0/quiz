@@ -1,8 +1,18 @@
 <h2>Témakör szerkesztése</h2>
 
-<form action="/tema/<%= temakor.id %>?_method=PUT" method="POST">
-    <label for="nev">Témakör neve:</label>
-    <input type="text" id="nev" name="nev" value="<%= temakor.nev %>" required>
+<form action="/tema/<%= temakor.id %>" method="POST" class="tema-form">
+    <input type="hidden" name="_method" value="PUT">
     
-    <button type="submit">Mentés</button>
+    <div class="form-group">
+        <label for="nev">Témakör neve:</label>
+        <input type="text" id="nev" name="nev" value="<%= temakor.nev %>" required>
+        <% if (locals.error) { %>
+            <p class="error-message"><%= locals.error %></p>
+        <% } %>
+    </div>
+    
+    <div class="button-group">
+        <button type="submit" class="submit-btn">Mentés</button>
+        <a href="/tema" class="cancel-btn">Mégsem</a>
+    </div>
 </form>

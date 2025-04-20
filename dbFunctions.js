@@ -171,6 +171,67 @@ class DbFunctions {
             throw e;
         }
     }
+
+    static async getTekorById(id) {
+        const sql = `SELECT id, nev FROM Temakor WHERE id = :1`;
+        try {
+            const result = await DbFunctions.dbInstance().execute(sql, [id]);
+            
+            if (result.rows.length === 0) {
+                return null;
+            }
+            
+            return { 
+                id: result.rows[0][0], 
+                nev: result.rows[0][1] 
+            };
+        } catch (e) {
+            console.error("Hiba a témakör lekérdezésénél:", e);
+            throw e;
+        }
+    }
+    
+    static async updateTemakor(id, nev) {
+        const checkSql = `SELECT COUNT(*) FROM Temakor WHERE nev = :1 AND id != :2`;
+        try {
+            const checkResult = await DbFunctions.dbInstance().execute(checkSql, [nev, id]);
+            if (checkResult.rows[0][0] > 0) {
+                throw new Error("Már létezik ilyen nevű témakör!");
+            }
+            
+            const updateSql = `UPDATE Temakor SET nev = :1 WHERE id = :2`;
+            const result = await DbFunctions.dbInstance().execute(updateSql, [nev, id]);
+            await DbFunctions.dbInstance().commit();
+            
+            if (result.rowsAffected === 0) {
+                throw new Error("A témakör nem található!");
+            }
+            
+            console.log(`Témakör frissítve: ${nev} (ID: ${id})`);
+            return true;
+        } catch (e) {
+            console.error("Hiba a témakör frissítésekor:", e);
+            throw e;
+        }
+    }
+
+    static async deleteTemakor(id) {
+        try {
+            const sql = `DELETE FROM Temakor WHERE id = :1`;
+            const result = await DbFunctions.dbInstance().execute(sql, [id]);
+            await DbFunctions.dbInstance().commit();
+            
+            if (result.rowsAffected === 0) {
+                throw new Error("A témakör nem található!");
+            }
+            
+            console.log(`Témakör törölve: ID: ${id}`);
+            return true;
+        } catch (e) {
+            console.error("Hiba a témakör törlésekor:", e);
+            throw e;
+        }
+    }
 }
 
 module.exports = DbFunctions;
