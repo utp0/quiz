@@ -1,5 +1,3 @@
-const express = require("express");
-const path = require('path');
 const oracledb = require("oracledb");
 
 // Oracledb beállítása
@@ -8,8 +6,15 @@ _dbInstance.openDB().then(async () => {
     console.log("Adatbázis kapcsolat létrejött!");
 });
 
+const express = require("express");
+const cookieparser = require("cookie-parser");
+const path = require('path');
 
 const app = express();
+
+app.use(cookieparser());
+app.use(express.json());
+app.use(express.urlencoded());
 
 const PORT = process.env.PORT || 3000;  // ezt használjuk böngészőben
 

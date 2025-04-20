@@ -10,14 +10,16 @@ class DbFunctions {
     /**
      * @type {oracledb.Connection}
      */
-    static dbInstance = _dbInstance.getInstance();
+    static dbInstance = () => {
+        return _dbInstance.getInstance();
+    };
     static async registerUser(username, email, password, birthyear) {
         const sql = `INSERT INTO FELHASZNALO (FELHASZNALONEV, EMAIL, JELSZO, SZULETESI_EV, JOGOSULTSAG) VALUES (:1, :2, :3, :4, :5)`;
         try {
-            await DbFunctions.dbInstance.execute(sql, [
-                username, email, password, birthyear, 0
+            await DbFunctions.dbInstance().execute(sql, [
+                username, email, bcrypt.hashSync(password, 10), birthyear, 0
             ]);
-            await DbFunctions.dbInstance.commit();
+            await DbFunctions.dbInstance().commit();
             console.log(`Regisztráció siker: ${username}`);
         } catch (e) {
             console.error(e);
@@ -34,18 +36,19 @@ class DbFunctions {
         const sql = `SELECT * FROM FELHASZNALO WHERE FELHASZNALONEV = :1`;
         let ret = [];
         try {
-            ret = await DbFunctions.dbInstance.execute(sql, [
+            ret = await DbFunctions.dbInstance().execute(sql, [
                 username
             ], {
-                maxRows: 2
+                maxRows: 2,
+                outFormat: oracledb.OUT_FORMAT_OBJECT
             });
         } catch (e) {
-
+            console.error(e);
         }
-        if (ret.length == 0 || ret.length > 1) {
+        if (ret.rows.length == 0 || ret.rows.length > 1) {
             return null;  // vagy nincs, vagy több van (unique miatt nem lehet)
         }
-        const potential = ret[0];
+        const potential = ret.rows[0];
         let authedUser = null;
         const isCorrect = bcrypt.compareSync(plainpass, potential["JELSZO"]);
         if (!isCorrect) return null;
@@ -59,25 +62,41 @@ class DbFunctions {
             allTokens = fs.readFileSync(tokenPath, {
                 encoding: "utf-8"
             });
-
-            allTokens = JSON.parse(allTokens);
-            allTokens.push({
-                userId: authedUser["ID"],
-                token: bcrypt.hashSync("" + authedUser["ID"] + Date.now().toString() + Math.random().toString())
-            });
-            allTokens = JSON.stringify(allTokens, space = 2);
-
         } catch (e) {
             console.error("Tokenek betöltése/mentése nem sikerült, mind törölve.", e);
             allTokens = "[]";
             fs.writeFileSync(tokenPath, allTokens, {
-                encoding: "utf-8",
-                mode: "w"
+                encoding: "utf-8"
             });
         }
+
+        let currentToken = null;
+
+        try {
+            allTokens = JSON.parse(allTokens);
+            currentToken = {
+                userId: authedUser["ID"],
+                token: btoa(bcrypt.hashSync("" + authedUser["ID"] + Date.now().toString() + Math.random().toString(), 10))
+            };
+            allTokens.push(currentToken);
+            allTokens = JSON.stringify(allTokens, null, 2);
+        } catch (e) {
+            console.error("Tokenek betöltése/mentése nem sikerült, mind törölve.", e);
+            allTokens = "[]";
+        } finally {
+            fs.writeFileSync(tokenPath, allTokens, {
+                encoding: "utf-8"
+            });
+        }
+        return currentToken;
     }
 
-    static async verifyToken(userId, token) {
+    /**
+     * 
+     * @param {string} token 
+     * @returns {Promise<number|false>} userId vagy hamis
+     */
+    static async verifyToken(token) {
         /**
          * @type {Array}
          */
@@ -88,17 +107,34 @@ class DbFunctions {
             });
             allTokens = JSON.parse(allTokens);
         } catch (e) {
-
+            console.error("Tokenek beolvasása nem sikerült!", e);
         }
         let correct = false;
         allTokens.forEach(pair => {
-            if (pair["userId"] == userId) {
-                if (pair["token"] == token) {
-                    correct = true;
-                }
+            if (pair["token"] == token) {
+                correct = pair["userId"];
             }
         })
         return correct;
+    }
+
+    static async getUserById(userId) {
+        const sql = `SELECT * FROM FELHASZNALO WHERE ID = :1`;
+        let ret = [];
+        try {
+            ret = await DbFunctions.dbInstance().execute(sql, [
+                userId
+            ], {
+                maxRows: 2,
+                outFormat: oracledb.OUT_FORMAT_OBJECT
+            });
+        } catch (e) {
+            console.error(`Hiba felhasználó id alapján lekérése közben (${userId}), e`);
+        }
+        if (!ret.rows || ret.rows.length == 0 || ret.rows.length > 1) {
+            return null;  // vagy nincs, vagy több van (unique miatt nem lehet)
+        }
+        return ret.rows[0];
     }
 }
 
