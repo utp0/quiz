@@ -8,7 +8,7 @@ const methodOverride = require('method-override');
  */
 const app = new express.Router();
 
-const { registerUser, loginToken, verifyToken, getUserById, getAllTemakor, createTemakor, getTekorById, updateTemakor, deleteTemakor, deleteToken } = require("./dbFunctions");
+const { registerUser, loginToken, verifyToken, getUserById, getAllTemakor, createTemakor, getTekorById, updateTemakor, deleteTemakor, deleteToken, getAllJatekszoba, createJatekszoba, deleteJatekszoba } = require("./dbFunctions");
 
 app.use(async (req, res, next) => {
     const tokenCookie = req.cookies["token"] ?? null;
@@ -212,6 +212,101 @@ app.post("/tema/:id", async (req, res) => {
         res.status(400).send("Ismeretlen metódus");
     }
 });
+
+app.get("/jatekszoba", async (req, res) => {
+    try {
+        const szobak = await getAllJatekszoba();
+        res.render("main", {
+            page: "jatekszoba/list",
+            title: "Játékszobák",
+            jatekszobak: szobak
+        });
+    } catch (err) {
+        console.error("Hiba a játékszobák lekérdezésekor:", err);
+        res.status(500).send("Hiba történt a játékszobák lekérdezésekor.");
+    }
+});
+
+app.get("/jatekszoba/new", (req, res) => {
+    if (!res.locals.currentUser) {
+        return res.redirect("/login");
+    }
+
+    res.render("main", {
+        page: "jatekszoba/new",
+        title: "Új játékszoba létrehozása"
+    });
+});
+
+app.post("/jatekszoba/new", async (req, res) => {
+    if (!res.locals.currentUser) {
+        return res.redirect("/login");
+    }
+
+    const nev = req.body.nev?.trim();
+    const maxJatekos = parseInt(req.body.max_jatekos);
+    const felhasznalo_id = res.locals.currentUser["ID"];
+        
+        if (!felhasznalo_id) {
+            return res.status(400).send("Hiányzik a felhasználó azonosító!");
+        }
+
+    if (!nev || isNaN(maxJatekos) || maxJatekos < 2) {
+        return res.render("main", {
+            page: "jatekszoba/new",
+            title: "Új játékszoba létrehozása",
+            error: "Hibás név vagy játékos szám! Minimum 2 fő szükséges."
+        });
+    }
+
+    try {
+        await createJatekszoba(nev, felhasznalo_id, maxJatekos);
+        res.redirect("/jatekszoba");
+    } catch (err) {
+        console.error("Játékszoba létrehozása nem sikerült: ", err);
+        res.render("main", {
+            page: "jatekszoba/new",
+            title: "Új játékszoba létrehozása",
+            error: err.message || "Hiba történt a játékszoba létrehozásakor."
+        });
+    }
+});
+
+app.delete("/jatekszoba/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+        return res.status(400).send("Érvénytelen játékszoba azonosító");
+    }
+
+    try {
+        await deleteJatekszoba(id);  // deleteJatekszoba törlési funkció
+        res.redirect("/jatekszoba");
+    } catch (err) {
+        console.error("Hiba a játékszoba törlésekor:", err);
+        res.status(500).send("Hiba történt a játékszoba törlésekor: " + (err.message || "Ismeretlen hiba"));
+    }
+});
+
+app.post("/jatekszoba/:id", async (req, res) => {
+    if (req.body._method === "DELETE") {
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) {
+            return res.status(400).send("Érvénytelen játékszoba azonosító");
+        }
+
+        try {
+            await deleteJatekszoba(id);
+            res.redirect("/jatekszoba");
+        } catch (err) {
+            console.error("Hiba a játékszoba törlésekor:", err);
+            res.status(500).send("Hiba történt a játékszoba törlésekor: " + (err.message || "Ismeretlen hiba"));
+        }
+    } else {
+        res.status(400).send("Ismeretlen metódus");
+    }
+});
+
+
 
 
 module.exports = app;

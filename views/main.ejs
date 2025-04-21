@@ -16,6 +16,7 @@
             <a href="/login">Bejelentkezés</a> |
             <a href="/register">Regisztráció</a><% } else { %> |
             <a class="left-auto" href="/profile?id=<%= locals.currentUser["ID"] %>"><%= locals.currentUser["FELHASZNALONEV"] %></a> |
+            <a href="/jatekszoba">Játékszobák</a> |
             <a href="/logout">Kijelentkezés</a>
             <% } %>
         </nav>
