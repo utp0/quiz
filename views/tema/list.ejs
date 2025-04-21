@@ -16,7 +16,8 @@
                     <td><%= t.nev %></td>
                     <td>
                         <a href="/tema/<%= t.id %>/edit">Szerkesztés</a>
-                        <form action="/tema/<%= t.id %>?_method=DELETE" method="POST" style="display:inline;">
+                        <form action="/tema/<%= t.id %>" method="POST" style="display:inline;">
+                            <input type="hidden" name="_method" value="DELETE">
                             <button type="submit">Törlés</button>
                         </form>
                     </td>
