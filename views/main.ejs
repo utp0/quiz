@@ -1,28 +1,33 @@
 <!DOCTYPE html>
 <html lang="hu">
+
 <head>
     <meta charset="UTF-8">
     <title><%= locals.title ?? "Quiz" %></title>
     <link rel="stylesheet" href="/style.css" />
 </head>
+
 <body>
     <header>
         <h1>Kvíz alkalmazás</h1>
         <nav>
             <a href="/">Kezdőlap</a> |
-            <a href="/tema">Témakörök</a> |
+            <a href="/tema">Témakörök</a><% if(!locals.currentUser || locals.currentUser == null || typeof locals.currentUser == "undefined" ) { %> |
             <a href="/login">Bejelentkezés</a> |
-            <a href="/register">Regisztráció</a>
+            <a href="/register">Regisztráció</a><% } else { %> |
+            <a class="left-auto" href="/profile?id=<%= locals.currentUser["ID"] %>"><%= locals.currentUser["FELHASZNALONEV"] %></a> |
+            <a href="/logout">Kijelentkezés</a>
+            <% } %>
         </nav>
         <hr>
     </header>
 
     <main>
         <% try { %>
-            <%- include(locals.page) %>
+        <%- include(locals.page) %>
         <% } catch (error) { %>
-            <p style="color:red;"><%= `Hiba az oldal betöltésekor: ${locals.page}` %></p>
-            <pre><%= error.message %></pre>
+        <p style="color:red;"><%= `Hiba az oldal betöltésekor: ${locals.page}` %></p>
+        <pre><%= error.message %></pre>
         <% } %>
     </main>
 
@@ -31,4 +36,5 @@
         <p>&copy; 2025 Kvíz App</p>
     </footer>
 </body>
+
 </html>

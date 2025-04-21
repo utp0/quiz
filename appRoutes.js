@@ -73,6 +73,11 @@ app.get("/login", (req, res) => {
     });
 });
 
+app.all("/logout", (req, res) => {
+    res.clearCookie("token");
+    res.redirect("/");
+})
+
 app.post("/login", async (req, res) => {
     const username = req.body["usernameOrEmail"];
     const pass = req.body["password"];
