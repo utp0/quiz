@@ -13,6 +13,7 @@
         <nav>
             <a href="/">Kezdőlap</a> |
             <a href="/tema">Témakörök</a><% if(!locals.currentUser || locals.currentUser == null || typeof locals.currentUser == "undefined" ) { %> |
+            <a href="/kviz">Kvízek</a> |
             <a href="/login">Bejelentkezés</a> |
             <a href="/register">Regisztráció</a><% } else { %> |
             <a class="left-auto" href="/profile?id=<%= locals.currentUser["ID"] %>"><%= locals.currentUser["FELHASZNALONEV"] %></a> |

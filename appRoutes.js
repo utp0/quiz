@@ -8,7 +8,7 @@ const methodOverride = require('method-override');
  */
 const app = new express.Router();
 
-const { registerUser, loginToken, verifyToken, getUserById, getAllTemakor, createTemakor, getTekorById, updateTemakor, deleteTemakor, deleteToken } = require("./dbFunctions");
+const { registerUser, loginToken, verifyToken, getUserById, getAllTemakor, createTemakor, getTekorById, updateTemakor, deleteTemakor, deleteToken, getAllKviz, getKvizById } = require("./dbFunctions");
 
 app.use(async (req, res, next) => {
     const tokenCookie = req.cookies["token"] ?? null;
@@ -210,6 +210,46 @@ app.post("/tema/:id", async (req, res) => {
     }
     else {
         res.status(400).send("Ismeretlen metódus");
+    }
+});
+
+app.get("/kviz", async (req, res) => {
+    try {
+        const kvizek = await getAllKviz();
+
+        res.render("main", {
+            page: "kviz/kvizlist",
+            title: "Kvízek",
+            kvizek: kvizek
+        });
+    } catch (error) {
+        console.error("Hiba a kvízek lekérdezésénél:", error);
+        res.status(500).send("Hiba történt a kvízek lekérdezésénél.");
+    }
+});
+
+app.get("/kviz/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+
+    if (isNaN(id)) {
+        return res.status(400).send("Érvénytelen kvíz azonosító");
+    }
+
+    try {
+        const kviz = await getKvizById(id);
+
+        if (!kviz) {
+            return res.status(404).send("A kvíz nem található");
+        }
+
+        res.render("main", {
+            page: "kviz/details",
+            title: kviz.nev,
+            kviz: kviz
+        });
+    } catch (error) {
+        console.error("Hiba a kvíz betöltésekor:", error);
+        res.status(500).send("Hiba történt a kvíz betöltésekor.");
     }
 });
 

@@ -261,6 +261,48 @@ class DbFunctions {
             throw e;
         }
     }
+
+    static async getAllKviz() {
+        const sql = `SELECT id, nev, leiras, letrehozas_datuma FROM Kviz ORDER BY letrehozas_datuma DESC`;
+    
+        try {
+            const result = await DbFunctions.dbInstance().execute(sql, []);
+    
+            return result.rows.map(row => ({
+                id: row[0],
+                nev: row[1],
+                leiras: row[2],
+                letrehozas_datuma: row[3]
+            }));
+        } catch (e) {
+            console.error("Hiba a kvízek lekérdezésénél:", e);
+            throw e;
+        }
+    }
+    
+    static async getKvizById(id) {
+        const sql = `SELECT id, nev, leiras, letrehozas_datuma, felhasznalo_id FROM Kviz WHERE id = :1`;
+    
+        try {
+            const result = await DbFunctions.dbInstance().execute(sql, [id]);
+    
+            if (result.rows.length === 0) {
+                return null;
+            }
+    
+            const row = result.rows[0];
+            return {
+                id: row[0],
+                nev: row[1],
+                leiras: row[2],
+                letrehozas_datuma: row[3],
+                felhasznalo_id: row[4]
+            };
+        } catch (e) {
+            console.error("Hiba a kvíz lekérdezésénél:", e);
+            throw e;
+        }
+    }
 }
 
 module.exports = DbFunctions;

@@ -1,0 +1,16 @@
+<h2>Kvízek</h2>
+
+<% if (kvizek.length === 0) { %>
+    <p>Jelenleg nincs elérhető kvíz.</p>
+<% } else { %>
+    <ul>
+        <% kvizek.forEach(kviz => { %>
+            <li>
+                <strong><%= kviz.nev %></strong><br>
+                <em><%= kviz.leiras %></em><br>
+                Létrehozva: <%= new Date(kviz.letrehozas_datuma).toLocaleDateString("hu-HU") %><br>
+                <!-- később: <a href="/kviz/<%= kviz.id %>">Megtekintés</a> -->
+            </li>
+        <% }) %>
+    </ul>
+<% } %>
