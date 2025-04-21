@@ -108,6 +108,7 @@ class DbFunctions {
             allTokens = JSON.parse(allTokens);
         } catch (e) {
             console.error("Tokenek beolvasása nem sikerült!", e);
+            allTokens = [];
         }
         let correct = false;
         allTokens.forEach(pair => {
