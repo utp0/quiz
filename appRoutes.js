@@ -244,7 +244,7 @@ app.get("/kviz/:id", async (req, res) => {
 
         res.render("main", {
             page: "kviz/details",
-            title: kviz.nev,
+            title: `Kvíz: ${kviz.nev}`,
             kviz: kviz
         });
     } catch (error) {
