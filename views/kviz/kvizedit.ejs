@@ -1,0 +1,21 @@
+<h2>Kvíz szerkesztése</h2>
+
+<% if (typeof error !== "undefined") { %>
+    <p style="color: red;"><%= error %></p>
+<% } %>
+
+<form method="POST" action="/kviz/<%= kviz.id %>?_method=PUT">
+    <label for="nev">Kvíz neve:</label><br>
+    <input type="text" id="nev" name="nev" value="<%= kviz.nev %>" required><br>
+
+    <label for="leiras">Leírás:</label><br>
+    <textarea id="leiras" name="leiras"><%= kviz.leiras %></textarea><br>
+
+    <button type="submit">Mentés</button>
+</form>
+
+<form method="POST" action="/kviz/<%= kviz.id %>?_method=DELETE" onsubmit="return confirm('Biztos törölni szeretnéd ezt a kvízt?')">
+    <button type="submit">Törlés</button>
+</form>
+
+<a href="/kviz">← Vissza a kvízekhez</a>

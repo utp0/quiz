@@ -303,6 +303,57 @@ class DbFunctions {
             throw e;
         }
     }
+
+    static async createKviz(nev, leiras, felhasznaloId) {
+        const sql = `
+            INSERT INTO Kviz (id, nev, leiras, letrehozas_datuma, felhasznalo_id)
+            VALUES (kviz_seq.NEXTVAL, :1, :2, SYSDATE, :3)
+        `;
+        try {
+            await DbFunctions.dbInstance().execute(sql, [nev, leiras, felhasznaloId], { autoCommit: true });
+        } catch (e) {
+            console.error("Hiba a kvíz létrehozásánál:", e);
+            throw e;
+        }
+    }
+
+    static async getKvizById(id) {
+        const sql = `SELECT id, nev, leiras, letrehozas_datuma FROM Kviz WHERE id = :1`;
+        try {
+            const result = await DbFunctions.dbInstance().execute(sql, [id]);
+            if (result.rows.length === 0) return null;
+    
+            return {
+                id: result.rows[0][0],
+                nev: result.rows[0][1],
+                leiras: result.rows[0][2],
+                letrehozas_datuma: result.rows[0][3],
+            };
+        } catch (e) {
+            console.error("Hiba a kvíz lekérdezésénél:", e);
+            throw e;
+        }
+    }
+    
+    static async updateKviz(id, nev, leiras) {
+        const sql = `UPDATE Kviz SET nev = :1, leiras = :2 WHERE id = :3`;
+        try {
+            await DbFunctions.dbInstance().execute(sql, [nev, leiras, id], { autoCommit: true });
+        } catch (e) {
+            console.error("Hiba a kvíz frissítésénél:", e);
+            throw e;
+        }
+    }
+    
+    static async deleteKviz(id) {
+        const sql = `DELETE FROM Kviz WHERE id = :1`;
+        try {
+            await DbFunctions.dbInstance().execute(sql, [id], { autoCommit: true });
+        } catch (e) {
+            console.error("Hiba a kvíz törlésénél:", e);
+            throw e;
+        }
+    }
 }
 
 module.exports = DbFunctions;

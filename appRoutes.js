@@ -8,7 +8,8 @@ const methodOverride = require('method-override');
  */
 const app = new express.Router();
 
-const { registerUser, loginToken, verifyToken, getUserById, getAllTemakor, createTemakor, getTekorById, updateTemakor, deleteTemakor, deleteToken, getAllKviz, getKvizById } = require("./dbFunctions");
+const { registerUser, loginToken, verifyToken, getUserById, getAllTemakor, createTemakor, getTekorById, updateTemakor, deleteTemakor, deleteToken, getAllKviz, getKvizById, createKviz, updateKviz, deleteKviz } = require("./dbFunctions");
+const DbFunctions = require("./dbFunctions");
 
 app.use(async (req, res, next) => {
     const tokenCookie = req.cookies["token"] ?? null;
@@ -228,6 +229,17 @@ app.get("/kviz", async (req, res) => {
     }
 });
 
+app.get("/kviz/new", (req, res) => {
+    if (!res.locals.currentUser) {
+        return res.redirect("/login");
+    }
+
+    res.render("main", {
+        page: "kviz/kviznew",
+        title: "Új kvíz"
+    });
+});
+
 app.get("/kviz/:id", async (req, res) => {
     const id = parseInt(req.params.id);
 
@@ -250,6 +262,99 @@ app.get("/kviz/:id", async (req, res) => {
     } catch (error) {
         console.error("Hiba a kvíz betöltésekor:", error);
         res.status(500).send("Hiba történt a kvíz betöltésekor.");
+    }
+});
+
+
+
+app.post("/kviz", async (req, res) => {
+    if (!res.locals.currentUser) {
+        return res.redirect("/login");
+    }
+
+    const nev = req.body.nev?.trim();
+    const leiras = req.body.leiras?.trim() || "";
+
+    if (!nev || nev.length === 0) {
+        return res.render("main", {
+            page: "kviz/kviznew",
+            title: "Új kvíz",
+            error: "A kvíz neve nem lehet üres!"
+        });
+    }
+
+    try {
+        await createKviz(nev, leiras, res.locals.currentUser.ID);
+        res.redirect("/kviz");
+    } catch (error) {
+        console.error("Hiba a kvíz létrehozásánál:", error);
+        res.render("main", {
+            page: "kviz/kviznew",
+            title: "Új kvíz",
+            error: "Hiba történt a kvíz létrehozásakor."
+        });
+    }
+});
+
+app.get("/kviz/:id/edit", async (req, res) => {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).send("Érvénytelen kvíz azonosító");
+
+    try {
+        const kviz = await DbFunctions.getKvizById(id);
+        if (!kviz) return res.status(404).send("A kvíz nem található");
+
+        res.render("main", {
+            page: "kviz/kvizedit",
+            title: "Kvíz szerkesztése",
+            kviz
+        });
+    } catch (error) {
+        console.error("Hiba a kvíz szerkesztésnél:", error);
+        res.status(500).send("Hiba történt a kvíz betöltésekor.");
+    }
+});
+
+app.post("/kviz/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).send("Érvénytelen kvíz azonosító");
+
+    if (req.body._method === "PUT") {
+        const nev = req.body.nev?.trim();
+        const leiras = req.body.leiras?.trim();
+
+        if (!nev) {
+            const kviz = await DbFunctions.getKvizById(id);
+            return res.render("main", {
+                page: "kviz/kvizedit",
+                title: "Kvíz szerkesztése",
+                kviz,
+                error: "A kvíz neve nem lehet üres!"
+            });
+        }
+
+        try {
+            await DbFunctions.updateKviz(id, nev, leiras);
+            res.redirect("/kviz");
+        } catch (error) {
+            const kviz = await DbFunctions.getKvizById(id);
+            res.render("main", {
+                page: "kviz/kvizedit",
+                title: "Kvíz szerkesztése",
+                kviz,
+                error: error.message || "Hiba történt a frissítés során."
+            });
+        }
+    } else if (req.body._method === "DELETE") {
+        try {
+            await DbFunctions.deleteKviz(id);
+            res.redirect("/kviz");
+        } catch (error) {
+            console.error("Hiba a törlésnél:", error);
+            res.status(500).send("Hiba történt a törlés során.");
+        }
+    } else {
+        res.status(400).send("Ismeretlen metódus.");
     }
 });
 

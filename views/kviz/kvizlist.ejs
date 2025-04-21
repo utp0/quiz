@@ -9,7 +9,11 @@
                 <strong><a href="/kviz/<%= kviz.id %>"><%= kviz.nev %></a></strong><br>
                 <em><%= kviz.leiras %></em><br>
                 Létrehozva: <%= new Date(kviz.letrehozas_datuma).toLocaleDateString("hu-HU") %>
+                <a href="/kviz/<%= kviz.id %>/edit">Szerkesztés</a>
             </li>
         <% }) %>
     </ul>
+    
 <% } %>
+
+<a href="/kviz/new">+ Új kvíz létrehozása</a>
