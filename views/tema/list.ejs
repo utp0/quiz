@@ -1,0 +1,32 @@
+<h2>Témakörök</h2>
+
+<a href="/tema/new">+ Új témakör hozzáadása</a>
+
+<table>
+    <thead>
+        <tr>
+            <th>Név</th>
+            <th>Műveletek</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% if (locals.temakorok && locals.temakorok.length > 0) { %>
+            <% locals.temakorok.forEach(t => { %>
+                <tr>
+                    <td><%= t.nev %></td>
+                    <td>
+                        <a href="/tema/<%= t.id %>/edit">Szerkesztés</a>
+                        <form action="/tema/<%= t.id %>" method="POST" style="display:inline;">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit">Törlés</button>
+                        </form>
+                    </td>
+                </tr>
+            <% }) %>
+        <% } else { %>
+            <tr>
+                <td colspan="2">Nincsenek témakörök</td>
+            </tr>
+        <% } %>
+    </tbody>
+</table>

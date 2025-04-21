@@ -118,6 +118,33 @@ class DbFunctions {
         return correct;
     }
 
+    static deleteToken(token) {
+        let allTokens = [];
+        try {
+            allTokens = fs.readFileSync(tokenPath, {
+                encoding: "utf-8"
+            });
+            allTokens = JSON.parse(allTokens);
+        } catch (e) {
+            console.error("Tokenek beolvasása nem sikerült!", e);
+            return false;  // nemsikerült de kb mindegy
+        }
+        allTokens = allTokens.filter(element => {
+            if (element["token"] == token) return false;
+            return true;
+        });
+        try {
+            allTokens = JSON.stringify(allTokens, null, 2);
+            fs.writeFileSync(tokenPath, allTokens, {
+                encoding: "utf-8"
+            });
+            return true;
+        } catch (e) {
+            console.error("Kijelentkezéskori token törlése nem sikerült.", e);
+            return false;
+        }
+    }
+
     static async getUserById(userId) {
         if(userId === false) return null;  // kliens süti nélkül ne próbáljuk
         const sql = `SELECT * FROM FELHASZNALO WHERE ID = :1`;
@@ -136,6 +163,102 @@ class DbFunctions {
             return null;  // vagy nincs, vagy több van (unique miatt nem lehet)
         }
         return ret.rows[0];
+    }
+
+    static async getAllTemakor() {
+        const sql = `SELECT id, nev FROM Temakor ORDER BY nev`;
+        try {
+            const result = await DbFunctions.dbInstance().execute(sql, []);
+            return result.rows.map(row => ({ id: row[0], nev: row[1] }));
+        } catch (e) {
+            console.error("Hiba a témakörök lekérdezésénél:", e);
+            throw e;
+        }
+    }
+
+    static async createTemakor(nev) {
+        const checkSql = `SELECT COUNT(*) FROM Temakor WHERE nev = :1`;
+        try {
+            const checkResult = await DbFunctions.dbInstance().execute(checkSql, [nev]);
+            if (checkResult.rows[0][0] > 0) {
+                throw new Error("Már létezik ilyen nevű témakör!");
+            }
+
+            const idSql = `SELECT NVL(MAX(id), 0) + 1 FROM Temakor`;
+            const idResult = await DbFunctions.dbInstance().execute(idSql, []);
+            const nextId = idResult.rows[0][0];
+
+            const insertSql = `INSERT INTO Temakor (id, nev) VALUES (:1, :2)`;
+            await DbFunctions.dbInstance().execute(insertSql, [nextId, nev]);
+            await DbFunctions.dbInstance().commit();
+
+            console.log(`Új témakör létrehozva: ${nev} (ID: ${nextId})`);
+            return nextId;
+        } catch (e) {
+            console.error("Hiba a témakör létrehozásakor:", e);
+            throw e;
+        }
+    }
+
+    static async getTekorById(id) {
+        const sql = `SELECT id, nev FROM Temakor WHERE id = :1`;
+        try {
+            const result = await DbFunctions.dbInstance().execute(sql, [id]);
+
+            if (result.rows.length === 0) {
+                return null;
+            }
+
+            return {
+                id: result.rows[0][0],
+                nev: result.rows[0][1]
+            };
+        } catch (e) {
+            console.error("Hiba a témakör lekérdezésénél:", e);
+            throw e;
+        }
+    }
+
+    static async updateTemakor(id, nev) {
+        const checkSql = `SELECT COUNT(*) FROM Temakor WHERE nev = :1 AND id != :2`;
+        try {
+            const checkResult = await DbFunctions.dbInstance().execute(checkSql, [nev, id]);
+            if (checkResult.rows[0][0] > 0) {
+                throw new Error("Már létezik ilyen nevű témakör!");
+            }
+
+            const updateSql = `UPDATE Temakor SET nev = :1 WHERE id = :2`;
+            const result = await DbFunctions.dbInstance().execute(updateSql, [nev, id]);
+            await DbFunctions.dbInstance().commit();
+
+            if (result.rowsAffected === 0) {
+                throw new Error("A témakör nem található!");
+            }
+
+            console.log(`Témakör frissítve: ${nev} (ID: ${id})`);
+            return true;
+        } catch (e) {
+            console.error("Hiba a témakör frissítésekor:", e);
+            throw e;
+        }
+    }
+
+    static async deleteTemakor(id) {
+        try {
+            const sql = `DELETE FROM Temakor WHERE id = :1`;
+            const result = await DbFunctions.dbInstance().execute(sql, [id]);
+            await DbFunctions.dbInstance().commit();
+
+            if (result.rowsAffected === 0) {
+                throw new Error("A témakör nem található!");
+            }
+
+            console.log(`Témakör törölve: ID: ${id}`);
+            return true;
+        } catch (e) {
+            console.error("Hiba a témakör törlésekor:", e);
+            throw e;
+        }
     }
 }
 

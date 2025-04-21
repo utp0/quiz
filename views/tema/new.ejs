@@ -1,0 +1,16 @@
+<h2>Új témakör hozzáadása</h2>
+
+<form action="/tema" method="POST" class="tema-form">
+    <div class="form-group">
+        <label for="nev">Témakör neve:</label>
+        <input type="text" id="nev" name="nev" required>
+        <% if (locals.error) { %>
+            <p class="error-message"><%= locals.error %></p>
+        <% } %>
+    </div>
+    
+    <div class="button-group">
+        <button type="submit" class="submit-btn">Mentés</button>
+        <a href="/tema" class="cancel-btn">Mégsem</a>
+    </div>
+</form>
