@@ -8,7 +8,7 @@ const methodOverride = require('method-override');
  */
 const app = new express.Router();
 
-const { registerUser, loginToken, verifyToken, getUserById, getAllTemakor, createTemakor, getTekorById, updateTemakor, deleteTemakor, deleteToken } = require("./dbFunctions");
+const { registerUser, loginToken, verifyToken, getUserById, getAllTemakor, createTemakor, getTekorById, updateTemakor, deleteTemakor, deleteToken, getAllKerdes, createKerdes, getKerdesById, updateKerdes, deleteKerdes } = require("./dbFunctions");
 
 app.use(async (req, res, next) => {
     const tokenCookie = req.cookies["token"] ?? null;
@@ -25,6 +25,13 @@ app.use(async (req, res, next) => {
     }
     next()
 })
+
+function isNotAdmin(currentUser) {
+    if(typeof currentUser !== "undefined" && currentUser && currentUser["JOGOSULTSAG"] === "admin") {
+        return false;
+    }
+    return true;
+}
 
 app.use(methodOverride('_method'));
 
@@ -109,6 +116,7 @@ app.get("/tema", async (req, res) => {
 });
 
 app.get("/tema/new", (req, res) => {
+    if(isNotAdmin(res.locals.currentUser)) return res.status(400).json({message: "Ehhez nincs engedélyed!"});
     res.render("main", {
         page: "tema/new",
         title: "Új témakör"
@@ -116,6 +124,7 @@ app.get("/tema/new", (req, res) => {
 });
 
 app.post("/tema", async (req, res) => {
+    if(isNotAdmin(res.locals.currentUser)) return res.status(400).json({message: "Ehhez nincs engedélyed!"});
     const nev = req.body.nev?.trim();
 
     if (!nev || nev.length === 0) {
@@ -139,6 +148,7 @@ app.post("/tema", async (req, res) => {
 });
 
 app.get("/tema/:id/edit", async (req, res) => {
+    if(isNotAdmin(res.locals.currentUser)) return res.status(400).json({message: "Ehhez nincs engedélyed!"});
     try {
         const id = parseInt(req.params.id);
         if (isNaN(id)) {
@@ -162,6 +172,7 @@ app.get("/tema/:id/edit", async (req, res) => {
 });
 
 app.post("/tema/:id", async (req, res) => {
+    if(isNotAdmin(res.locals.currentUser)) return res.status(400).json({message: "Ehhez nincs engedélyed!"});
     if (req.body._method === "PUT") {
         const nev = req.body.nev?.trim();
         const id = parseInt(req.params.id);
@@ -206,6 +217,132 @@ app.post("/tema/:id", async (req, res) => {
         } catch (error) {
             console.error("Hiba a témakör törlésekor:", error);
             res.status(500).send("Hiba történt a témakör törlésekor: " + (error.message || "Ismeretlen hiba"));
+        }
+    }
+    else {
+        res.status(400).send("Ismeretlen metódus");
+    }
+});
+
+
+app.get("/kerdes", async (req, res) => {
+    try {
+        const kerdesek = await getAllKerdes();
+
+        res.render("main", {
+            page: "kerdes/list",
+            title: "Kérdések",
+            kerdesek: kerdesek
+        });
+    } catch (error) {
+        console.error("Hiba a kérdések lekérdezésénél:", error);
+        res.status(500).send("Hiba történt a témakörök lekérdezésénél.");
+    }
+});
+
+app.get("/kerdes/new", (req, res) => {
+    if(isNotAdmin(res.locals.currentUser)) return res.status(400).json({message: "Ehhez nincs engedélyed!"});
+    res.render("main", {
+        page: "kerdes/new",
+        title: "Új kérdés"
+    });
+});
+
+
+app.post("/kerdes", async (req, res) => {
+    if(isNotAdmin(res.locals.currentUser)) return res.status(400).json({message: "Ehhez nincs engedélyed!"});
+    const nev = req.body.nev?.trim();
+
+    if (!nev || nev.length === 0) {
+        return res.render("main", {
+            page: "kerdes/new",
+            title: "Új kérdés",
+            error: "A kérdés szövege nem lehet üres!"
+        });
+    }
+
+    try {
+        await createKerdes(nev);
+        res.redirect("/kerdes");
+    } catch (error) {
+        res.render("main", {
+            page: "kerdes/list",
+            title: "Új kérdés",
+            error: error.message || "Hiba történt a kérdés létrehozásakor."
+        });
+    }
+});
+
+app.get("/kerdes/:id/edit", async (req, res) => {
+    if(isNotAdmin(res.locals.currentUser)) return res.status(400).json({message: "Ehhez nincs engedélyed!"});
+    try {
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) {
+            return res.status(400).send("Érvénytelen kérdés azonosító");
+        }
+
+        const kerdes = await getKerdesById(id);
+        if (!kerdes) {
+            return res.status(404).send("A kérdés nem található");
+        }
+
+        res.render("main", {
+            page: "kerdes/edit",
+            title: "Kérdés szerkesztése",
+            kerdes: kerdes
+        });
+    } catch (error) {
+        console.error("Hiba a kérdés betöltésekor:", error);
+        res.status(500).send("Hiba történt a kérdés betöltésekor.");
+    }
+});
+
+app.post("/kerdes/:id", async (req, res) => {
+    if(isNotAdmin(res.locals.currentUser)) return res.status(400).json({message: "Ehhez nincs engedélyed!"});
+    if (req.body._method === "PUT") {
+        const nev = req.body.nev?.trim();
+        const id = parseInt(req.params.id);
+
+        if (isNaN(id)) {
+            return res.status(400).send("Érvénytelen kérdés azonosító");
+        }
+
+        if (!nev || nev.length === 0) {
+            const kerdes = await getKerdesById(id);
+            return res.render("main", {
+                page: "kerdes/edit",
+                title: "Kérdés szerkesztése",
+                kerdes: kerdes,
+                error: "A kérdés neve nem lehet üres!"
+            });
+        }
+
+        try {
+            await updateKerdes(id, nev);
+            res.redirect("/kerdes");
+        } catch (error) {
+            const kerdes = await getKerdesById(id);
+            res.render("main", {
+                page: "kerdes/edit",
+                title: "Kérdés szerkesztése",
+                kerdes: kerdes,
+                error: error.message || "Hiba történt a kérdés frissítésekor."
+            });
+        }
+    }
+    else if (req.body._method === "DELETE") {
+        const id = parseInt(req.params.id);
+
+        if (isNaN(id)) {
+            return res.status(400).send("Érvénytelen kérdés azonosító");
+        }
+
+        try {
+            await deleteKerdes(id);
+            res.redirect("/kerdes");
+        } catch (error) {
+            console.error("Hiba a kérdés törlésekor:", error);
+            res.status(500).send("Hiba történt a kérdés törlésekor: " + (error.message || "Ismeretlen hiba"));
         }
     }
     else {

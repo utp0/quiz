@@ -147,7 +147,7 @@ class DbFunctions {
     }
 
     static async getUserById(userId) {
-        if(userId === false) return null;  // kliens süti nélkül ne próbáljuk
+        if (userId === false) return null;  // kliens süti nélkül ne próbáljuk
         const sql = `SELECT * FROM FELHASZNALO WHERE ID = :1`;
         let ret = [];
         try {
@@ -258,6 +258,105 @@ class DbFunctions {
             return true;
         } catch (e) {
             console.error("Hiba a témakör törlésekor:", e);
+            throw e;
+        }
+    }
+
+    static async getAllKerdes() {
+        const sql = `SELECT id, szoveg FROM KERDES ORDER BY szoveg`;
+        try {
+            const result = await DbFunctions.dbInstance().execute(sql, [],
+                { outFormat: oracledb.OUT_FORMAT_OBJECT }
+            );
+            return result.rows.map(row => ({ id: row["ID"], nev: row["SZOVEG"] }));
+        } catch (e) {
+            console.error("Hiba a kérdések lekérdezésénél:", e);
+            throw e;
+        }
+    }
+
+    static async createKerdes(szoveg) {
+        const checkSql = `SELECT COUNT(*) FROM KERDES WHERE SZOVEG = :1`;
+        try {
+            const checkResult = await DbFunctions.dbInstance().execute(checkSql, [szoveg]);
+            if (checkResult.rows[0][0] > 0) {
+                throw (new Error("Már létezik ez a kérdés!"));
+            }
+
+            const idSql = `SELECT NVL(MAX(id), 0) + 1 FROM KERDES`;
+            const idResult = await DbFunctions.dbInstance().execute(idSql, []);
+            //const nextId = idResult.rows[0][0];
+
+            const insertSql = `INSERT INTO KERDES (szoveg, kviz_id) VALUES (:1, :2)`;
+            await DbFunctions.dbInstance().execute(insertSql, [szoveg, 99999]);
+            await DbFunctions.dbInstance().commit();
+
+            console.log(`Új kérdés létrehozva: ${szoveg}`);
+        } catch (e) {
+            console.error("Hiba a kérdés létrehozásakor:", e);
+            throw e;
+        }
+    }
+
+    static async getKerdesById(id) {
+        const sql = `SELECT id, szoveg FROM KERDES WHERE id = :1`;
+        try {
+            const result = await DbFunctions.dbInstance().execute(sql, [id],
+                { outFormat: oracledb.OUT_FORMAT_OBJECT }
+            );
+
+            if (result.rows.length === 0) {
+                return null;
+            }
+
+            return {
+                id: result.rows[0]["ID"],
+                szoveg: result.rows[0]["SZOVEG"]
+            };
+        } catch (e) {
+            console.error("Hiba a témakör lekérdezésénél:", e);
+            throw e;
+        }
+    }
+
+    static async updateKerdes(id, szoveg) {
+        const checkSql = `SELECT COUNT(*) FROM KERDES WHERE szoveg = :1 AND id != :2`;
+        try {
+            const checkResult = await DbFunctions.dbInstance().execute(checkSql, [szoveg, id]);
+            if (checkResult.rows[0][0] > 0) {
+                throw new Error("Már létezik ilyen kérdés!");
+            }
+
+            const updateSql = `UPDATE KERDES SET szoveg = :1 WHERE id = :2`;
+            const result = await DbFunctions.dbInstance().execute(updateSql, [szoveg, id]);
+            await DbFunctions.dbInstance().commit();
+
+            if (result.rowsAffected === 0) {
+                throw new Error("A kérdés nem található!");
+            }
+
+            console.log(`Kérdés frissítve: ${szoveg}`);
+            return true;
+        } catch (e) {
+            console.error("Hiba a kérdés frissítésekor:", e);
+            throw e;
+        }
+    }
+
+    static async deleteKerdes(id) {
+        try {
+            const sql = `DELETE FROM KERDES WHERE id = :1`;
+            const result = await DbFunctions.dbInstance().execute(sql, [id]);
+            await DbFunctions.dbInstance().commit();
+
+            if (result.rowsAffected === 0) {
+                throw new Error("A kérdés nem található!");
+            }
+
+            console.log(`Kérdés törölve: ID: ${id}`);
+            return true;
+        } catch (e) {
+            console.error("Hiba a kérdés törlésekor:", e);
             throw e;
         }
     }

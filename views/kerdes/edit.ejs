@@ -1,0 +1,18 @@
+<h2>Kérdés szerkesztése</h2>
+
+<form action="/kerdes/<%= kerdes.id %>" method="POST" class="tema-form">
+    <input type="hidden" name="_method" value="PUT">
+    
+    <div class="form-group">
+        <label for="nev">Kérdés szövege:</label>
+        <input type="text" id="nev" name="nev" value="<%= kerdes.szoveg %>" required>
+        <% if (locals.error) { %>
+            <p class="error-message"><%= locals.error %></p>
+        <% } %>
+    </div>
+    
+    <div class="button-group">
+        <button type="submit" class="submit-btn">Mentés</button>
+        <a href="/kerdes" class="cancel-btn">Mégsem</a>
+    </div>
+</form>

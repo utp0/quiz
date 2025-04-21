@@ -1,0 +1,34 @@
+<h2>Kérdések</h2>
+<% if(locals.currentUser && locals.currentUser["JOGOSULTSAG"] == "admin") { %>
+<a href="/kerdes/new">+ Új kérdés hozzáadása</a>
+<% } %>
+<table>
+    <thead>
+        <tr>
+            <th>Szöveg</th>
+            <th>Műveletek</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% if (locals.kerdesek && locals.kerdesek.length > 0) { %>
+        <% locals.kerdesek.forEach(t => { %>
+        <tr>
+            <td><%= t.nev %></td>
+            <td>
+                <% if(locals.currentUser && locals.currentUser["JOGOSULTSAG"] == "admin") { %>
+                <a href="/kerdes/<%= t.id %>/edit">Szerkesztés</a>
+                <form action="/kerdes/<%= t.id %>" method="POST" style="display:inline;">
+                    <input type="hidden" name="_method" value="DELETE">
+                    <button type="submit">Törlés</button>
+                </form>
+                <% } %>
+            </td>
+        </tr>
+        <% }) %>
+        <% } else { %>
+        <tr>
+            <td colspan="2">Nincsenek kérdések</td>
+        </tr>
+        <% } %>
+    </tbody>
+</table>

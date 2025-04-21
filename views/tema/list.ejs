@@ -1,7 +1,7 @@
 <h2>Témakörök</h2>
-
+<% if(locals.currentUser && locals.currentUser["JOGOSULTSAG"] == "admin") { %>
 <a href="/tema/new">+ Új témakör hozzáadása</a>
-
+<% } %>
 <table>
     <thead>
         <tr>
@@ -15,11 +15,13 @@
                 <tr>
                     <td><%= t.nev %></td>
                     <td>
+                        <% if(locals.currentUser && locals.currentUser["JOGOSULTSAG"] == "admin") { %>
                         <a href="/tema/<%= t.id %>/edit">Szerkesztés</a>
                         <form action="/tema/<%= t.id %>" method="POST" style="display:inline;">
                             <input type="hidden" name="_method" value="DELETE">
                             <button type="submit">Törlés</button>
                         </form>
+                        <% } %>
                     </td>
                 </tr>
             <% }) %>
