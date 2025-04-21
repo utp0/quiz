@@ -17,7 +17,7 @@ class DbFunctions {
         const sql = `INSERT INTO FELHASZNALO (FELHASZNALONEV, EMAIL, JELSZO, SZULETESI_EV, JOGOSULTSAG) VALUES (:1, :2, :3, :4, :5)`;
         try {
             await DbFunctions.dbInstance().execute(sql, [
-                username, email, bcrypt.hashSync(password, 10), birthyear, 0
+                username, email, bcrypt.hashSync(password, 10), birthyear, "felhasznalo"
             ]);
             await DbFunctions.dbInstance().commit();
             console.log(`Regisztráció siker: ${username}`);
