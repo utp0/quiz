@@ -8,7 +8,7 @@ const methodOverride = require('method-override');
  */
 const app = new express.Router();
 
-const { registerUser, loginToken, verifyToken, getUserById, getAllTemakor, createTemakor, getTekorById, updateTemakor, deleteTemakor  } = require("./dbFunctions");
+const { registerUser, loginToken, verifyToken, getUserById, getAllTemakor, createTemakor, getTekorById, updateTemakor, deleteTemakor, deleteToken } = require("./dbFunctions");
 
 app.use(async (req, res, next) => {
     const tokenCookie = req.cookies["token"] ?? null;
@@ -74,6 +74,7 @@ app.get("/login", (req, res) => {
 });
 
 app.all("/logout", (req, res) => {
+    deleteToken(req.cookies["token"] ?? null);
     res.clearCookie("token");
     res.redirect("/");
 })
@@ -90,7 +91,7 @@ app.post("/login", async (req, res) => {
 app.get("/tema", async (req, res) => {
     try {
         const temakorok = await getAllTemakor();
-        
+
         res.render("main", {
             page: "tema/list",
             title: "Témakörök",
@@ -111,7 +112,7 @@ app.get("/tema/new", (req, res) => {
 
 app.post("/tema", async (req, res) => {
     const nev = req.body.nev?.trim();
-    
+
     if (!nev || nev.length === 0) {
         return res.render("main", {
             page: "tema/new",
@@ -119,7 +120,7 @@ app.post("/tema", async (req, res) => {
             error: "A témakör neve nem lehet üres!"
         });
     }
-    
+
     try {
         await createTemakor(nev);
         res.redirect("/tema");
@@ -138,12 +139,12 @@ app.get("/tema/:id/edit", async (req, res) => {
         if (isNaN(id)) {
             return res.status(400).send("Érvénytelen témakör azonosító");
         }
-        
+
         const temakor = await getTekorById(id);
         if (!temakor) {
             return res.status(404).send("A témakör nem található");
         }
-        
+
         res.render("main", {
             page: "tema/edit",
             title: "Témakör szerkesztése",
@@ -159,11 +160,11 @@ app.post("/tema/:id", async (req, res) => {
     if (req.body._method === "PUT") {
         const nev = req.body.nev?.trim();
         const id = parseInt(req.params.id);
-        
+
         if (isNaN(id)) {
             return res.status(400).send("Érvénytelen témakör azonosító");
         }
-        
+
         if (!nev || nev.length === 0) {
             const temakor = await getTekorById(id);
             return res.render("main", {
@@ -173,7 +174,7 @@ app.post("/tema/:id", async (req, res) => {
                 error: "A témakör neve nem lehet üres!"
             });
         }
-        
+
         try {
             await updateTemakor(id, nev);
             res.redirect("/tema");
@@ -189,11 +190,11 @@ app.post("/tema/:id", async (req, res) => {
     }
     else if (req.body._method === "DELETE") {
         const id = parseInt(req.params.id);
-        
+
         if (isNaN(id)) {
             return res.status(400).send("Érvénytelen témakör azonosító");
         }
-        
+
         try {
             await deleteTemakor(id);
             res.redirect("/tema");
