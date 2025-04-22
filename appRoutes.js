@@ -100,10 +100,11 @@ app.post("/login", async (req, res) => {
     const obj = await loginToken(username, pass);
     const strToken = obj != null ? obj.token ?? null : null;
     if (obj == null || obj.token == null) {
-        // TODO: hibaüzenet
+        res.clearCookie("token");
+        return res.status(400).json({ "message": "Ez a név/jelszó kombináció nem létezik!" });
     }
     res.cookie("token", strToken ?? "");
-    res.redirect("/");
+    return res.redirect("/");
 });
 
 app.get("/profile", async (req, res) => {
