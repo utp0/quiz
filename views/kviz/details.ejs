@@ -1,0 +1,7 @@
+<h2><%= kviz.nev %></h2>
+
+<p><strong>Leírás:</strong> <%= kviz.leiras || "Nincs megadva" %></p>
+<p><strong>Létrehozás dátuma:</strong> <%= new Date(kviz.letrehozas_datuma).toLocaleDateString("hu-HU") %></p>
+<p><strong>Készítette:</strong> <%= kviz.keszito || "Ismeretlen" %></p>
+
+<a href="/kviz">Vissza a kvízekhez</a>

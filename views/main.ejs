@@ -13,10 +13,11 @@
         <nav>
             <a href="/">Kezdőlap</a> |
             <a href="/tema">Témakörök</a> |
-            <a href="/kerdes">Kérdések</a>
-            <% if(!locals.currentUser || locals.currentUser == null || typeof locals.currentUser == "undefined" ) { %> |
+            <a href="/kerdes">Kérdések</a> |
+            <a href="/kviz">Kvízek</a> |
+            <% if(!locals.currentUser || locals.currentUser == null || typeof locals.currentUser == "undefined" ) { %>
             <a href="/login">Bejelentkezés</a> |
-            <a href="/register">Regisztráció</a><% } else { %> |
+            <a href="/register">Regisztráció</a><% } else { %>
             <a class="left-auto" href="/profile?id=<%= locals.currentUser["ID"] %>"><%= locals.currentUser["FELHASZNALONEV"] %></a> |
             <a href="/logout">Kijelentkezés</a>
             <% } %>

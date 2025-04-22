@@ -30,7 +30,7 @@ class DbFunctions {
      * 
      * @param {string} username 
      * @param {string} plainpass
-     * @returns {string|null} vagy a token, vagy null ha nem sikerült belépni
+     * @returns {Promise<string|null>} vagy a token, vagy null ha nem sikerült belépni
      */
     static async loginToken(username, plainpass) {
         const sql = `SELECT * FROM FELHASZNALO WHERE FELHASZNALONEV = :1`;
@@ -258,6 +258,99 @@ class DbFunctions {
             return true;
         } catch (e) {
             console.error("Hiba a témakör törlésekor:", e);
+            throw e;
+        }
+    }
+
+    static async getAllKviz() {
+        const sql = `SELECT id, nev, leiras, letrehozas_datuma FROM Kviz ORDER BY letrehozas_datuma DESC`;
+    
+        try {
+            const result = await DbFunctions.dbInstance().execute(sql, []);
+    
+            return result.rows.map(row => ({
+                id: row[0],
+                nev: row[1],
+                leiras: row[2],
+                letrehozas_datuma: row[3]
+            }));
+        } catch (e) {
+            console.error("Hiba a kvízek lekérdezésénél:", e);
+            throw e;
+        }
+    }
+    
+    static async getKvizById(id) {
+        const sql = `SELECT id, nev, leiras, letrehozas_datuma, felhasznalo_id FROM Kviz WHERE id = :1`;
+    
+        try {
+            const result = await DbFunctions.dbInstance().execute(sql, [id]);
+    
+            if (result.rows.length === 0) {
+                return null;
+            }
+    
+            const row = result.rows[0];
+            return {
+                id: row[0],
+                nev: row[1],
+                leiras: row[2],
+                letrehozas_datuma: row[3],
+                felhasznalo_id: row[4]
+            };
+        } catch (e) {
+            console.error("Hiba a kvíz lekérdezésénél:", e);
+            throw e;
+        }
+    }
+
+    static async createKviz(nev, leiras, felhasznaloId) {
+        const sql = `
+            INSERT INTO Kviz (id, nev, leiras, letrehozas_datuma, felhasznalo_id)
+            VALUES (kviz_seq.NEXTVAL, :1, :2, SYSDATE, :3)
+        `;
+        try {
+            await DbFunctions.dbInstance().execute(sql, [nev, leiras, felhasznaloId], { autoCommit: true });
+        } catch (e) {
+            console.error("Hiba a kvíz létrehozásánál:", e);
+            throw e;
+        }
+    }
+
+    static async getKvizById(id) {
+        const sql = `SELECT id, nev, leiras, letrehozas_datuma FROM Kviz WHERE id = :1`;
+        try {
+            const result = await DbFunctions.dbInstance().execute(sql, [id]);
+            if (result.rows.length === 0) return null;
+    
+            return {
+                id: result.rows[0][0],
+                nev: result.rows[0][1],
+                leiras: result.rows[0][2],
+                letrehozas_datuma: result.rows[0][3],
+            };
+        } catch (e) {
+            console.error("Hiba a kvíz lekérdezésénél:", e);
+            throw e;
+        }
+    }
+    
+    static async updateKviz(id, nev, leiras) {
+        const sql = `UPDATE Kviz SET nev = :1, leiras = :2 WHERE id = :3`;
+        try {
+            await DbFunctions.dbInstance().execute(sql, [nev, leiras, id], { autoCommit: true });
+        } catch (e) {
+            console.error("Hiba a kvíz frissítésénél:", e);
+            throw e;
+        }
+    }
+    
+    static async deleteKviz(id) {
+        const sql = `DELETE FROM Kviz WHERE id = :1`;
+        try {
+            await DbFunctions.dbInstance().execute(sql, [id], { autoCommit: true });
+        } catch (e) {
+            console.error("Hiba a kvíz törlésénél:", e);
             throw e;
         }
     }

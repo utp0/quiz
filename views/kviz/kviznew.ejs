@@ -1,0 +1,17 @@
+<h2>Új kvíz létrehozása</h2>
+
+<% if (typeof error !== "undefined") { %>
+    <p style="color: red;"><%= error %></p>
+<% } %>
+
+<form action="/kviz" method="POST">
+    <label for="nev">Kvíz neve:</label><br>
+    <input type="text" id="nev" name="nev" required><br><br>
+
+    <label for="leiras">Leírás:</label><br>
+    <textarea id="leiras" name="leiras" rows="5"></textarea><br><br>
+
+    <button type="submit">Létrehozás</button>
+</form>
+
+<a href="/kviz">Vissza a kvízekhez</a>

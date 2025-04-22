@@ -8,13 +8,16 @@ _dbInstance.openDB().then(async () => {
 
 const express = require("express");
 const cookieparser = require("cookie-parser");
+const methodOverride = require('method-override');
 const path = require('path');
+
 
 const app = express();
 
 app.use(cookieparser());
 app.use(express.json());
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride('_method'));
 
 const PORT = process.env.PORT || 3000;  // ezt használjuk böngészőben
 
