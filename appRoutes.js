@@ -88,7 +88,11 @@ app.post("/login", async (req, res) => {
     const username = req.body["usernameOrEmail"];
     const pass = req.body["password"];
 
-    const strToken = (await loginToken(username, pass)).token;
+    const obj = await loginToken(username, pass);
+    const strToken = obj != null ? obj.token ?? null : null;
+    if(obj == null || obj.token == null) {
+        // TODO: hibaüzenet
+    }
     res.cookie("token", strToken ?? "");
     res.redirect("/");
 });

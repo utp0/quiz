@@ -30,7 +30,7 @@ class DbFunctions {
      * 
      * @param {string} username 
      * @param {string} plainpass
-     * @returns {string|null} vagy a token, vagy null ha nem sikerült belépni
+     * @returns {Promise<string|null>} vagy a token, vagy null ha nem sikerült belépni
      */
     static async loginToken(username, plainpass) {
         const sql = `SELECT * FROM FELHASZNALO WHERE FELHASZNALONEV = :1`;
