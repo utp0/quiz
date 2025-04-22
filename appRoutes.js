@@ -29,7 +29,7 @@ app.use(async (req, res, next) => {
 
 
 function isNotAdmin(currentUser) {
-    if(typeof currentUser !== "undefined" && currentUser && currentUser["JOGOSULTSAG"] === "admin") {
+    if (typeof currentUser !== "undefined" && currentUser && currentUser["JOGOSULTSAG"] === "admin") {
         return false;
     }
     return true;
@@ -99,11 +99,20 @@ app.post("/login", async (req, res) => {
 
     const obj = await loginToken(username, pass);
     const strToken = obj != null ? obj.token ?? null : null;
-    if(obj == null || obj.token == null) {
+    if (obj == null || obj.token == null) {
         // TODO: hibaüzenet
     }
     res.cookie("token", strToken ?? "");
     res.redirect("/");
+});
+
+app.get("/profile", async (req, res) => {
+    return res.render("main",
+        {
+            page: "partial/profile",
+            title: "Profil",
+        }
+    );
 });
 
 app.get("/tema", async (req, res) => {
@@ -122,7 +131,7 @@ app.get("/tema", async (req, res) => {
 });
 
 app.get("/tema/new", (req, res) => {
-    if(isNotAdmin(res.locals.currentUser)) return res.status(400).json({message: "Ehhez nincs engedélyed!"});
+    if (isNotAdmin(res.locals.currentUser)) return res.status(400).json({ message: "Ehhez nincs engedélyed!" });
     res.render("main", {
         page: "tema/new",
         title: "Új témakör"
@@ -130,7 +139,7 @@ app.get("/tema/new", (req, res) => {
 });
 
 app.post("/tema", async (req, res) => {
-    if(isNotAdmin(res.locals.currentUser)) return res.status(400).json({message: "Ehhez nincs engedélyed!"});
+    if (isNotAdmin(res.locals.currentUser)) return res.status(400).json({ message: "Ehhez nincs engedélyed!" });
     const nev = req.body.nev?.trim();
 
     if (!nev || nev.length === 0) {
@@ -154,7 +163,7 @@ app.post("/tema", async (req, res) => {
 });
 
 app.get("/tema/:id/edit", async (req, res) => {
-    if(isNotAdmin(res.locals.currentUser)) return res.status(400).json({message: "Ehhez nincs engedélyed!"});
+    if (isNotAdmin(res.locals.currentUser)) return res.status(400).json({ message: "Ehhez nincs engedélyed!" });
     try {
         const id = parseInt(req.params.id);
         if (isNaN(id)) {
@@ -178,7 +187,7 @@ app.get("/tema/:id/edit", async (req, res) => {
 });
 
 app.post("/tema/:id", async (req, res) => {
-    if(isNotAdmin(res.locals.currentUser)) return res.status(400).json({message: "Ehhez nincs engedélyed!"});
+    if (isNotAdmin(res.locals.currentUser)) return res.status(400).json({ message: "Ehhez nincs engedélyed!" });
     if (req.body._method === "PUT") {
         const nev = req.body.nev?.trim();
         const id = parseInt(req.params.id);
@@ -391,7 +400,7 @@ app.get("/kerdes", async (req, res) => {
 });
 
 app.get("/kerdes/new", (req, res) => {
-    if(isNotAdmin(res.locals.currentUser)) return res.status(400).json({message: "Ehhez nincs engedélyed!"});
+    if (isNotAdmin(res.locals.currentUser)) return res.status(400).json({ message: "Ehhez nincs engedélyed!" });
     res.render("main", {
         page: "kerdes/new",
         title: "Új kérdés"
@@ -400,7 +409,7 @@ app.get("/kerdes/new", (req, res) => {
 
 
 app.post("/kerdes", async (req, res) => {
-    if(isNotAdmin(res.locals.currentUser)) return res.status(400).json({message: "Ehhez nincs engedélyed!"});
+    if (isNotAdmin(res.locals.currentUser)) return res.status(400).json({ message: "Ehhez nincs engedélyed!" });
     const nev = req.body.nev?.trim();
 
     if (!nev || nev.length === 0) {
@@ -424,7 +433,7 @@ app.post("/kerdes", async (req, res) => {
 });
 
 app.get("/kerdes/:id/edit", async (req, res) => {
-    if(isNotAdmin(res.locals.currentUser)) return res.status(400).json({message: "Ehhez nincs engedélyed!"});
+    if (isNotAdmin(res.locals.currentUser)) return res.status(400).json({ message: "Ehhez nincs engedélyed!" });
     try {
         const id = parseInt(req.params.id);
         if (isNaN(id)) {
@@ -448,7 +457,7 @@ app.get("/kerdes/:id/edit", async (req, res) => {
 });
 
 app.post("/kerdes/:id", async (req, res) => {
-    if(isNotAdmin(res.locals.currentUser)) return res.status(400).json({message: "Ehhez nincs engedélyed!"});
+    if (isNotAdmin(res.locals.currentUser)) return res.status(400).json({ message: "Ehhez nincs engedélyed!" });
     if (req.body._method === "PUT") {
         const nev = req.body.nev?.trim();
         const id = parseInt(req.params.id);
