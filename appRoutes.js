@@ -107,10 +107,25 @@ app.post("/login", async (req, res) => {
 });
 
 app.get("/profile", async (req, res) => {
+    const stats = await DbFunctions.getStatsForUser(res.locals.currentUser["ID"]);
+    let quizes = [];
+
+    for (const element of stats) {
+        try {
+            const quiz = await getKvizById(element["KVIZ_ID"]);
+            quizes.push(quiz);
+        } catch (error) {
+            console.error(`Kvíz lekérése sikertelen! id: ${element["KVIZ_ID"]}`);
+            quizes.push({});
+        }
+    }
+
     return res.render("main",
         {
             page: "partial/profile",
             title: "Profil",
+            stats: stats,
+            quizes: quizes,
         }
     );
 });
@@ -542,10 +557,10 @@ app.post("/jatekszoba/new", async (req, res) => {
     const nev = req.body.nev?.trim();
     const maxJatekos = parseInt(req.body.max_jatekos);
     const felhasznalo_id = res.locals.currentUser["ID"];
-        
-        if (!felhasznalo_id) {
-            return res.status(400).send("Hiányzik a felhasználó azonosító!");
-        }
+
+    if (!felhasznalo_id) {
+        return res.status(400).send("Hiányzik a felhasználó azonosító!");
+    }
 
     if (!nev || isNaN(maxJatekos) || maxJatekos < 2) {
         return res.render("main", {

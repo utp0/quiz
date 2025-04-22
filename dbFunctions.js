@@ -264,10 +264,10 @@ class DbFunctions {
 
     static async getAllKviz() {
         const sql = `SELECT id, nev, leiras, letrehozas_datuma FROM Kviz ORDER BY letrehozas_datuma DESC`;
-    
+
         try {
             const result = await DbFunctions.dbInstance().execute(sql, []);
-    
+
             return result.rows.map(row => ({
                 id: row[0],
                 nev: row[1],
@@ -279,17 +279,17 @@ class DbFunctions {
             throw e;
         }
     }
-    
+
     static async getKvizById(id) {
         const sql = `SELECT id, nev, leiras, letrehozas_datuma, felhasznalo_id FROM Kviz WHERE id = :1`;
-    
+
         try {
             const result = await DbFunctions.dbInstance().execute(sql, [id]);
-    
+
             if (result.rows.length === 0) {
                 return null;
             }
-    
+
             const row = result.rows[0];
             return {
                 id: row[0],
@@ -322,7 +322,7 @@ class DbFunctions {
         try {
             const result = await DbFunctions.dbInstance().execute(sql, [id]);
             if (result.rows.length === 0) return null;
-    
+
             return {
                 id: result.rows[0][0],
                 nev: result.rows[0][1],
@@ -334,7 +334,7 @@ class DbFunctions {
             throw e;
         }
     }
-    
+
     static async updateKviz(id, nev, leiras) {
         const sql = `UPDATE Kviz SET nev = :1, leiras = :2 WHERE id = :3`;
         try {
@@ -344,7 +344,7 @@ class DbFunctions {
             throw e;
         }
     }
-    
+
     static async deleteKviz(id) {
         const sql = `DELETE FROM Kviz WHERE id = :1`;
         try {
@@ -464,7 +464,7 @@ class DbFunctions {
             throw e;
         }
     }
-    
+
 
     static async createJatekszoba(nev, felhasznaloId, maxJatekos) {
         const checkSql = `SELECT COUNT(*) FROM Jatekszoba WHERE nev = :1`;
@@ -473,18 +473,18 @@ class DbFunctions {
             if (checkResult.rows[0][0] > 0) {
                 throw new Error("Már létezik ilyen nevű játékszoba!");
             }
-    
+
             // const idSql = `SELECT NVL(MAX(id), 0) + 1 FROM Jatekszoba`;
             // const idResult = await DbFunctions.dbInstance().execute(idSql, []);
             // const nextId = idResult.rows[0][0];
-    
+
             const insertSql = `
                 INSERT INTO Jatekszoba (nev, felhasznalo_id, max_jatekos)
                 VALUES (:1, :2, :3)
             `;
             await DbFunctions.dbInstance().execute(insertSql, [nev, felhasznaloId, maxJatekos]);
             await DbFunctions.dbInstance().commit();
-    
+
             console.log(`Új játékszoba létrehozva: ${nev}`);
         } catch (e) {
             console.error("Hiba a játékszoba létrehozásakor:", e);
@@ -497,11 +497,11 @@ class DbFunctions {
             const sql = `DELETE FROM Jatekszoba WHERE id = :1`;
             const result = await DbFunctions.dbInstance().execute(sql, [id]);
             await DbFunctions.dbInstance().commit();
-    
+
             if (result.rowsAffected === 0) {
                 throw new Error("A játékszoba nem található!");
             }
-    
+
             console.log(`Játékszoba törölve: ID: ${id}`);
             return true;
         } catch (e) {
@@ -509,8 +509,42 @@ class DbFunctions {
             throw e;
         }
     }
-    
-    
+
+    static async getStatsForUser(userId) {
+        if (!userId) return null;
+        const sql = `
+        SELECT
+            s.ID,
+            s.FELHASZNALO_ID,
+            s.KVIZ_ID,
+            s.ATLAGOS_KITOLTESI_IDO,
+            s.HELYES_VALASZOK_ARANYA
+        FROM
+            "C##FELHASZNALO"."STATISZTIKA" s
+        INNER JOIN (
+            SELECT
+                MAX(ID) AS max_id
+            FROM
+                "C##FELHASZNALO"."STATISZTIKA"
+            WHERE
+                FELHASZNALO_ID = :1
+            GROUP BY
+                KVIZ_ID
+        ) latest ON s.ID = latest.max_id
+        `;
+        try {
+            const result = await DbFunctions.dbInstance().execute(sql, [userId],
+                {
+                    outFormat: oracledb.OUT_FORMAT_OBJECT
+                }
+            );
+            return result.rows ?? null;
+        } catch(e) {
+            console.error(`Hiba felhasználói statisztikák lekérésekor! userId: ${userId}`, e);
+            return null;
+        }
+    }
+
 }
 
 module.exports = DbFunctions;
