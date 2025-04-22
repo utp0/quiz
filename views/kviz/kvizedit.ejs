@@ -4,7 +4,8 @@
     <p style="color: red;"><%= error %></p>
 <% } %>
 
-<form method="POST" action="/kviz/<%= kviz.id %>?_method=PUT">
+<form method="POST" action="/kviz/<%= kviz.id %>">
+    <input type="hidden" name="_method" value="PUT">
     <label for="nev">Kvíz neve:</label><br>
     <input type="text" id="nev" name="nev" value="<%= kviz.nev %>" required><br>
 
@@ -14,7 +15,8 @@
     <button type="submit">Mentés</button>
 </form>
 
-<form method="POST" action="/kviz/<%= kviz.id %>?_method=DELETE" onsubmit="return confirm('Biztos törölni szeretnéd ezt a kvízt?')">
+<form method="POST" action="/kviz/<%= kviz.id %>" onsubmit="return confirm('Biztos törölni szeretnéd ezt a kvízt?')">
+    <input type="hidden" name="_method" value="DELETE">
     <button type="submit">Törlés</button>
 </form>
 

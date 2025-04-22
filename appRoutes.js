@@ -27,7 +27,6 @@ app.use(async (req, res, next) => {
     next()
 })
 
-app.use(methodOverride('_method'));
 
 app.get("/api/ping", (req, res) => {
     res.json({ message: "pong" });
