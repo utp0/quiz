@@ -453,6 +453,64 @@ class DbFunctions {
             throw e;
         }
     }
+
+    static async getAllJatekszoba() {
+        const sql = `SELECT ID, NEV, MAX_JATEKOS FROM Jatekszoba ORDER BY NEV`;
+        try {
+            const result = await DbFunctions.dbInstance().execute(sql, [], { outFormat: oracledb.OUT_FORMAT_OBJECT });
+            return result.rows;
+        } catch (e) {
+            console.error("Hiba a játékszobák lekérdezésekor:", e);
+            throw e;
+        }
+    }
+    
+
+    static async createJatekszoba(nev, felhasznaloId, maxJatekos) {
+        const checkSql = `SELECT COUNT(*) FROM Jatekszoba WHERE nev = :1`;
+        try {
+            const checkResult = await DbFunctions.dbInstance().execute(checkSql, [nev]);
+            if (checkResult.rows[0][0] > 0) {
+                throw new Error("Már létezik ilyen nevű játékszoba!");
+            }
+    
+            // const idSql = `SELECT NVL(MAX(id), 0) + 1 FROM Jatekszoba`;
+            // const idResult = await DbFunctions.dbInstance().execute(idSql, []);
+            // const nextId = idResult.rows[0][0];
+    
+            const insertSql = `
+                INSERT INTO Jatekszoba (nev, felhasznalo_id, max_jatekos)
+                VALUES (:1, :2, :3)
+            `;
+            await DbFunctions.dbInstance().execute(insertSql, [nev, felhasznaloId, maxJatekos]);
+            await DbFunctions.dbInstance().commit();
+    
+            console.log(`Új játékszoba létrehozva: ${nev}`);
+        } catch (e) {
+            console.error("Hiba a játékszoba létrehozásakor:", e);
+            throw e;
+        }
+    }
+
+    static async deleteJatekszoba(id) {
+        try {
+            const sql = `DELETE FROM Jatekszoba WHERE id = :1`;
+            const result = await DbFunctions.dbInstance().execute(sql, [id]);
+            await DbFunctions.dbInstance().commit();
+    
+            if (result.rowsAffected === 0) {
+                throw new Error("A játékszoba nem található!");
+            }
+    
+            console.log(`Játékszoba törölve: ID: ${id}`);
+            return true;
+        } catch (e) {
+            console.error("Hiba a játékszoba törlésekor:", e);
+            throw e;
+        }
+    }
+    
+    
 }
 
 module.exports = DbFunctions;

@@ -9,7 +9,9 @@
                 <strong><a href="/kviz/<%= kviz.id %>"><%= kviz.nev %></a></strong><br>
                 <em><%= kviz.leiras %></em><br>
                 Létrehozva: <%= new Date(kviz.letrehozas_datuma).toLocaleDateString("hu-HU") %>
+                <% if(locals.currentUser && locals.currentUser["JOGOSULTSAG"] == "admin") { %>
                 <a href="/kviz/<%= kviz.id %>/edit">Szerkesztés</a>
+                <% } %>
             </li>
         <% }) %>
     </ul>

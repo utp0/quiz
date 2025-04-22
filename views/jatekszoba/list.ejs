@@ -1,0 +1,35 @@
+<h2>Játékszobák</h2>
+
+<a href="/jatekszoba/new">+ Új játékszoba hozzáadása</a>
+
+<table>
+    <thead>
+        <tr>
+            <th>Név</th>
+            <th>Max. játékos</th>
+            <th>Művelet</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% if (jatekszobak && jatekszobak.length > 0) { %>
+            <% jatekszobak.forEach(szoba => { %>
+                <tr>
+                    <td><%= szoba.NEV %></td>
+                    <td><%= szoba.MAX_JATEKOS %></td>
+                    <td>
+                        <% if(locals.currentUser && locals.currentUser["JOGOSULTSAG"] == "admin") { %>
+                        <form action="/jatekszoba/<%= szoba.ID %>" method="POST">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit">Törlés</button>
+                        </form>
+                        <% } %>
+                    </td>
+                </tr>
+            <% }) %>
+        <% } else { %>
+            <tr>
+                <td colspan="3">Nincsenek játékszobák</td>
+            </tr>
+        <% } %>
+    </tbody>
+</table>
