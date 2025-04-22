@@ -28,11 +28,11 @@ app.use(async (req, res, next) => {
 })
 
 
-function isNotAdmin(currentUser) {
+function isAdmin(req, res, next) {
     if (typeof currentUser !== "undefined" && currentUser && currentUser["JOGOSULTSAG"] === "admin") {
-        return false;
+        return next();
     }
-    return true;
+    return res.status(400).json({ message: "Ehhez nincs engedélyed!" });
 }
 
 app.use(methodOverride('_method'));
@@ -130,16 +130,16 @@ app.get("/tema", async (req, res) => {
     }
 });
 
-app.get("/tema/new", (req, res) => {
-    if (isNotAdmin(res.locals.currentUser)) return res.status(400).json({ message: "Ehhez nincs engedélyed!" });
+app.get("/tema/new", isAdmin, (req, res) => {
+
     res.render("main", {
         page: "tema/new",
         title: "Új témakör"
     });
 });
 
-app.post("/tema", async (req, res) => {
-    if (isNotAdmin(res.locals.currentUser)) return res.status(400).json({ message: "Ehhez nincs engedélyed!" });
+app.post("/tema", isAdmin, async (req, res) => {
+
     const nev = req.body.nev?.trim();
 
     if (!nev || nev.length === 0) {
@@ -162,8 +162,8 @@ app.post("/tema", async (req, res) => {
     }
 });
 
-app.get("/tema/:id/edit", async (req, res) => {
-    if (isNotAdmin(res.locals.currentUser)) return res.status(400).json({ message: "Ehhez nincs engedélyed!" });
+app.get("/tema/:id/edit", isAdmin, async (req, res) => {
+
     try {
         const id = parseInt(req.params.id);
         if (isNaN(id)) {
@@ -186,8 +186,8 @@ app.get("/tema/:id/edit", async (req, res) => {
     }
 });
 
-app.post("/tema/:id", async (req, res) => {
-    if (isNotAdmin(res.locals.currentUser)) return res.status(400).json({ message: "Ehhez nincs engedélyed!" });
+app.post("/tema/:id", isAdmin, async (req, res) => {
+
     if (req.body._method === "PUT") {
         const nev = req.body.nev?.trim();
         const id = parseInt(req.params.id);
@@ -254,7 +254,7 @@ app.get("/kviz", async (req, res) => {
     }
 });
 
-app.get("/kviz/new", (req, res) => {
+app.get("/kviz/new", isAdmin, (req, res) => {
     if (!res.locals.currentUser) {
         return res.redirect("/login");
     }
@@ -399,8 +399,8 @@ app.get("/kerdes", async (req, res) => {
     }
 });
 
-app.get("/kerdes/new", (req, res) => {
-    if (isNotAdmin(res.locals.currentUser)) return res.status(400).json({ message: "Ehhez nincs engedélyed!" });
+app.get("/kerdes/new", isAdmin, (req, res) => {
+
     res.render("main", {
         page: "kerdes/new",
         title: "Új kérdés"
@@ -408,8 +408,8 @@ app.get("/kerdes/new", (req, res) => {
 });
 
 
-app.post("/kerdes", async (req, res) => {
-    if (isNotAdmin(res.locals.currentUser)) return res.status(400).json({ message: "Ehhez nincs engedélyed!" });
+app.post("/kerdes", isAdmin, async (req, res) => {
+
     const nev = req.body.nev?.trim();
 
     if (!nev || nev.length === 0) {
@@ -432,8 +432,8 @@ app.post("/kerdes", async (req, res) => {
     }
 });
 
-app.get("/kerdes/:id/edit", async (req, res) => {
-    if (isNotAdmin(res.locals.currentUser)) return res.status(400).json({ message: "Ehhez nincs engedélyed!" });
+app.get("/kerdes/:id/edit", isAdmin, async (req, res) => {
+
     try {
         const id = parseInt(req.params.id);
         if (isNaN(id)) {
@@ -456,8 +456,8 @@ app.get("/kerdes/:id/edit", async (req, res) => {
     }
 });
 
-app.post("/kerdes/:id", async (req, res) => {
-    if (isNotAdmin(res.locals.currentUser)) return res.status(400).json({ message: "Ehhez nincs engedélyed!" });
+app.post("/kerdes/:id", isAdmin, async (req, res) => {
+
     if (req.body._method === "PUT") {
         const nev = req.body.nev?.trim();
         const id = parseInt(req.params.id);
