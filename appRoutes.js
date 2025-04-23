@@ -29,7 +29,7 @@ app.use(async (req, res, next) => {
 
 
 function isAdmin(req, res, next) {
-    if (typeof currentUser !== "undefined" && currentUser && currentUser["JOGOSULTSAG"] === "admin") {
+    if (typeof res.locals.currentUser !== "undefined" && res.locals.currentUser && res.locals.currentUser["JOGOSULTSAG"] === "admin") {
         return next();
     }
     return res.status(400).json({ message: "Ehhez nincs engedélyed!" });
