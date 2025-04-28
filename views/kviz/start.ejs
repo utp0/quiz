@@ -1,0 +1,213 @@
+<%- include('../partial/homepage') %>
+
+<div class="quiz-container">
+    <h1>Kvíz kitöltése</h1>
+
+    <% if (!questions || questions.length === 0) { %>
+        <div class="alert alert-warning">
+            <p>Ehhez a kvízhez nincsenek kérdések, vagy hiba történt a betöltés során.</p>
+            <p>Kvíz azonosító: <%= locals.currentUser["ID"] %></p>
+        </div>
+        <a href="/kviz" class="btn">Vissza a kvízekhez</a>
+    <% } else { %>
+    
+    <form id="quizForm" action="/kviz/submit" method="POST">
+        <input type="hidden" name="quizId" value="<%= questions[0] ? questions[0].id : '' %>">
+        
+        <div id="question-container">
+            <% for(let i = 0; i < questions.length; i++) { %>
+                <% const question = questions[i]; %>
+                <div class="question" id="question-<%= i %>" style="display: none;">
+                    <h2>Kérdés <%= i+1 %>/<%= questions.length %></h2>
+                    <h3><%= question.szoveg %></h3>
+                    <input type="hidden" name="questions[<%= i %>][id]" value="<%= question.id %>">
+                    
+                    <% if(question.idokorlat) { %>
+                        <div class="timer" data-seconds="<%= question.idokorlat %>">
+                            <span class="time-remaining"><%= question.idokorlat %></span> másodperc van hátra
+                        </div>
+                    <% } %>
+                    
+                    <div class="answers">
+                        <% for(let j = 0; j < question.valaszok.length; j++) { %>
+                            <% const valasz = question.valaszok[j]; %>
+                            <div class="answer-option">
+                                <input type="radio" id="q<%= question.id %>a<%= valasz.id %>" 
+                                       name="questions[<%= i %>][selectedAnswer]" 
+                                       value="<%= valasz.id %>" required>
+                                <label for="q<%= question.id %>a<%= valasz.id %>"><%= valasz.szoveg %></label>
+                            </div>
+                        <% } %>
+                    </div>
+                    
+                    <div class="navigation-buttons">
+                        <button type="button" class="prev-btn">Előző</button>
+                        <button type="button" class="next-btn">Következő</button>
+                        <button type="submit" class="submit-btn" style="display: none;">Kitöltés befejezése</button>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+        
+        <div class="quiz-progress">
+            <div class="progress-bar">
+                <div class="progress" style="width: 0%"></div>
+            </div>
+            <div class="question-counter">1/<%= questions.length %></div>
+        </div>
+    </form>
+    <% } %>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const questions = document.querySelectorAll('.question');
+        let currentQuestion = 0;
+        const totalQuestions = questions.length;
+        
+        if (questions.length > 0) {
+            questions[0].style.display = 'block';
+        }
+        
+        document.querySelectorAll('.prev-btn').forEach((btn, index) => {
+            btn.addEventListener('click', function() {
+                if (currentQuestion > 0) {
+                    showQuestion(currentQuestion - 1);
+                }
+            });
+            
+            if (index === 0) {
+                btn.style.display = 'none';
+            }
+        });
+        
+        document.querySelectorAll('.next-btn').forEach((btn, index) => {
+            btn.addEventListener('click', function() {
+                const currentQuestionEl = questions[currentQuestion];
+                const selectedAnswer = currentQuestionEl.querySelector('input[type="radio"]:checked');
+                
+                if (!selectedAnswer) {
+                    alert('Kérjük, válaszolj a kérdésre mielőtt továbblépnél!');
+                    return;
+                }
+                
+                if (currentQuestion < totalQuestions - 1) {
+                    showQuestion(currentQuestion + 1);
+                }
+            });
+            
+            if (index === questions.length - 1) {
+                btn.style.display = 'none';
+                document.querySelectorAll('.submit-btn')[index].style.display = 'block';
+            }
+        });
+        
+        function showQuestion(index) {
+            questions.forEach(q => {
+                q.style.display = 'none';
+            });
+            
+            questions[index].style.display = 'block';
+            
+            updateProgress(index);
+            
+            currentQuestion = index;
+            
+            document.querySelectorAll('.prev-btn')[index].style.display = index > 0 ? 'block' : 'none';
+            document.querySelectorAll('.next-btn')[index].style.display = index < totalQuestions - 1 ? 'block' : 'none';
+            document.querySelectorAll('.submit-btn')[index].style.display = index === totalQuestions - 1 ? 'block' : 'none';
+        }
+        
+        function updateProgress(index) {
+            const percentage = ((index + 1) / totalQuestions) * 100;
+            document.querySelector('.progress').style.width = `${percentage}%`;
+            document.querySelector('.question-counter').textContent = `${index + 1}/${totalQuestions}`;
+        }
+        
+        document.querySelectorAll('.timer').forEach(timer => {
+            const secondsElement = timer.querySelector('.time-remaining');
+            let seconds = parseInt(timer.dataset.seconds);
+            
+            const interval = setInterval(() => {
+                seconds--;
+                secondsElement.textContent = seconds;
+                
+                if (seconds <= 0) {
+                    clearInterval(interval);
+                    const questionIndex = parseInt(timer.closest('.question').id.split('-')[1]);
+                    
+                    if (questionIndex < totalQuestions - 1) {
+                        showQuestion(questionIndex + 1);
+                    } else {
+                        document.getElementById('quizForm').submit();
+                    }
+                }
+            }, 1000);
+        });
+    });
+</script>
+
+<style>
+    .quiz-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .question {
+        margin-bottom: 20px;
+    }
+    
+    .answers {
+        margin: 20px 0;
+    }
+    
+    .answer-option {
+        margin: 10px 0;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    
+    .answer-option:hover {
+        background-color: #f5f5f5;
+    }
+    
+    .navigation-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+    
+    .quiz-progress {
+        margin-top: 20px;
+    }
+    
+    .progress-bar {
+        height: 10px;
+        background-color: #eee;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+    
+    .progress {
+        height: 100%;
+        background-color: #4CAF50;
+        transition: width 0.3s ease;
+    }
+    
+    .timer {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        font-weight: bold;
+    }
+    
+    .question-counter {
+        text-align: center;
+        margin-top: 5px;
+    }
+</style>

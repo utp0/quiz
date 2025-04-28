@@ -1,6 +1,7 @@
 const path = require("path");
 const express = require("express");
 const methodOverride = require('method-override');
+const quizController = require('./controllers/quizController');
 
 
 /**
@@ -114,6 +115,10 @@ app.get("/profile", async (req, res) => {
         }
     );
 });
+
+app.get("/kviz/start/:id", quizController.startQuiz);
+
+app.post('/kviz/submit', quizController.submitQuiz);
 
 app.get("/tema", async (req, res) => {
     try {

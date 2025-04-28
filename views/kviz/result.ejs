@@ -1,0 +1,91 @@
+<%- include('../partial/homepage') %>
+
+<div class="result-container">
+    <h1>Kvíz eredménye</h1>
+    
+    <div class="score-summary">
+        <h2>Pontszám: <%= score %>/<%= totalQuestions %> (<%= percentage %>%)</h2>
+        
+        <div class="progress-bar">
+            <div class="progress" id="result-progress"></div>
+        </div>
+    </div>
+    
+    <div class="result-message">
+        <% if (percentage >= 90) { %>
+            <h3>Kiváló!</h3>
+            <p>Fantasztikus teljesítmény, szinte mindent tudtál!</p>
+        <% } else if (percentage >= 75) { %>
+            <h3>Nagyszerű!</h3>
+            <p>Nagyon jól teljesítettél!</p>
+        <% } else if (percentage >= 50) { %>
+            <h3>Jó munka!</h3>
+            <p>Több mint a felét eltaláltad, de még van mit tanulnod.</p>
+        <% } else { %>
+            <h3>Érdemes még gyakorolnod</h3>
+            <p>Ne csüggedj, legközelebb biztosan jobban fog sikerülni!</p>
+        <% } %>
+    </div>
+    
+    <div class="action-buttons">
+        <a href="/kviz/<%= quizId %>" class="btn">Próbáld újra</a>
+        <a href="/kviz" class="btn">Vissza a kvízekhez</a>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('result-progress').style.width = '<%= percentage %>%';
+    });
+</script>
+
+<style>
+    .result-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        text-align: center;
+    }
+    
+    .score-summary {
+        margin: 30px 0;
+    }
+    
+    .progress-bar {
+        height: 20px;
+        background-color: #eee;
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 20px 0;
+    }
+    
+    .progress {
+        height: 100%;
+        background-color: #4CAF50;
+    }
+    
+    .result-message {
+        margin: 30px 0;
+        padding: 20px;
+        border-radius: 10px;
+        background-color: #f9f9f9;
+    }
+    
+    .action-buttons {
+        margin-top: 30px;
+    }
+    
+    .btn {
+        display: inline-block;
+        padding: 10px 20px;
+        margin: 0 10px;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+    }
+    
+    .btn:hover {
+        background-color: #0056b3;
+    }
+</style>
