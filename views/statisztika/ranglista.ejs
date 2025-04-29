@@ -1,0 +1,150 @@
+
+
+<div class="container">
+    <h1 class="page-title"><%= title %></h1>
+    
+    <div class="stats-card">
+        <div class="card-header">
+            <h2>Legjobb kvízjátékosok</h2>
+        </div>
+        
+        <% if (rankings && rankings.length > 0) { %>
+            <table class="rankings-table">
+                <thead>
+                    <tr>
+                        <th>Helyezés</th>
+                        <th>Felhasználónév</th>
+                        <th>Összpontszám</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% rankings.forEach((player, index) => { %>
+                        <tr class="<%= index < 3 ? 'top-' + (index + 1) : '' %>">
+                            <td class="rank">
+                                <% if (index === 0) { %>
+                                    <span class="medal gold">🥇</span>
+                                <% } else if (index === 1) { %>
+                                    <span class="medal silver">🥈</span>
+                                <% } else if (index === 2) { %>
+                                    <span class="medal bronze">🥉</span>
+                                <% } else { %>
+                                    <%= player.HELYEZES %>
+                                <% } %>
+                            </td>
+                            <td><%= player.FELHASZNALONEV %></td>
+                            <td class="score"><%= player.OSSZPONTSZAM %> pont</td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        <% } else { %>
+            <div class="empty-state">
+                <p>Még nincsenek rangsorolható eredmények a rendszerben.</p>
+                <a href="/kviz" class="btn">Játssz egy kvízt most!</a>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<style>
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .page-title {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #2c3e50;
+        font-size: 32px;
+    }
+    
+    .stats-card {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+    
+    .card-header {
+        background-color: #3498db;
+        color: white;
+        padding: 15px 20px;
+    }
+    
+    .card-header h2 {
+        margin: 0;
+        font-size: 20px;
+    }
+    
+    .rankings-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .rankings-table th, .rankings-table td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .rankings-table th {
+        background-color: #f8f9fa;
+        font-weight: bold;
+    }
+    
+    .rankings-table tbody tr:hover {
+        background-color: #f5f5f5;
+    }
+    
+    .top-1 {
+        background-color: rgba(255, 215, 0, 0.1);
+        font-weight: bold;
+    }
+    
+    .top-2 {
+        background-color: rgba(192, 192, 192, 0.1);
+        font-weight: bold;
+    }
+    
+    .top-3 {
+        background-color: rgba(205, 127, 50, 0.1);
+        font-weight: bold;
+    }
+    
+    .medal {
+        font-size: 24px;
+        margin-right: 5px;
+    }
+    
+    .score {
+        font-weight: bold;
+        color: #2980b9;
+    }
+    
+    .empty-state {
+        padding: 40px 20px;
+        text-align: center;
+    }
+    
+    .empty-state p {
+        color: #7f8c8d;
+        margin-bottom: 20px;
+    }
+    
+    .btn {
+        display: inline-block;
+        background-color: #3498db;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 4px;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+    
+    .btn:hover {
+        background-color: #2980b9;
+    }
+</style>

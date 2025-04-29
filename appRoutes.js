@@ -167,6 +167,19 @@ app.post("/tema", isAdmin, async (req, res) => {
     }
 });
 
+const statisticsController = require('./controllers/statisticsController');
+
+app.get('/ranglista', statisticsController.showRankings);
+
+// Felhasználói statisztikák
+app.get('/statisztika/felhasznalo', statisticsController.showUserStatistics);
+
+// Kvíz statisztikák
+app.get('/statisztika/kviz/:id', statisticsController.showQuizStatistics);
+
+// Globális statisztikák
+app.get('/statisztika/globalis', statisticsController.showGlobalStatistics);
+
 app.get("/tema/:id/edit", isAdmin, async (req, res) => {
 
     try {
