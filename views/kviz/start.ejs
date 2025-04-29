@@ -6,13 +6,13 @@
     <% if (!questions || questions.length === 0) { %>
         <div class="alert alert-warning">
             <p>Ehhez a kvízhez nincsenek kérdések, vagy hiba történt a betöltés során.</p>
-            <p>Kvíz azonosító: <%= locals.currentUser["ID"] %></p>
+            <p>Kvíz azonosító: <%= quizId %></p>
         </div>
         <a href="/kviz" class="btn">Vissza a kvízekhez</a>
     <% } else { %>
     
     <form id="quizForm" action="/kviz/submit" method="POST">
-        <input type="hidden" name="quizId" value="<%= questions[0] ? questions[0].id : '' %>">
+        <input type="hidden" name="quizId" value="<%= quizId %>">
         
         <div id="question-container">
             <% for(let i = 0; i < questions.length; i++) { %>
@@ -21,6 +21,7 @@
                     <h2>Kérdés <%= i+1 %>/<%= questions.length %></h2>
                     <h3><%= question.szoveg %></h3>
                     <input type="hidden" name="questions[<%= i %>][id]" value="<%= question.id %>">
+                    <input type="hidden" name="questions[<%= i %>][answeredTime]" class="question-time" value="0">
                     
                     <% if(question.idokorlat) { %>
                         <div class="timer" data-seconds="<%= question.idokorlat %>">
@@ -69,9 +70,13 @@
             questions[0].style.display = 'block';
         }
         
+        const startTimes = new Array(totalQuestions).fill(0);
+        startTimes[0] = Date.now(); 
+        
         document.querySelectorAll('.prev-btn').forEach((btn, index) => {
             btn.addEventListener('click', function() {
                 if (currentQuestion > 0) {
+                    saveAnsweredTime(currentQuestion);
                     showQuestion(currentQuestion - 1);
                 }
             });
@@ -91,8 +96,11 @@
                     return;
                 }
                 
+                saveAnsweredTime(currentQuestion);
+                
                 if (currentQuestion < totalQuestions - 1) {
                     showQuestion(currentQuestion + 1);
+                    startTimes[currentQuestion + 1] = Date.now();
                 }
             });
             
@@ -101,6 +109,16 @@
                 document.querySelectorAll('.submit-btn')[index].style.display = 'block';
             }
         });
+        
+        document.getElementById('quizForm').addEventListener('submit', function() {
+            saveAnsweredTime(currentQuestion);
+        });
+        
+        function saveAnsweredTime(index) {
+            const elapsedTime = Math.floor((Date.now() - startTimes[index]) / 1000);
+            const timeField = questions[index].querySelector('.question-time');
+            timeField.value = elapsedTime;
+        }
         
         function showQuestion(index) {
             questions.forEach(q => {
@@ -135,9 +153,11 @@
                 if (seconds <= 0) {
                     clearInterval(interval);
                     const questionIndex = parseInt(timer.closest('.question').id.split('-')[1]);
+                    saveAnsweredTime(questionIndex);
                     
                     if (questionIndex < totalQuestions - 1) {
                         showQuestion(questionIndex + 1);
+                        startTimes[questionIndex + 1] = Date.now();
                     } else {
                         document.getElementById('quizForm').submit();
                     }
@@ -209,5 +229,31 @@
     .question-counter {
         text-align: center;
         margin-top: 5px;
+    }
+    
+    .alert {
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+    
+    .alert-warning {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeeba;
+    }
+    
+    .btn {
+        display: inline-block;
+        padding: 8px 16px;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    
+    .btn:hover {
+        background-color: #0069d9;
     }
 </style>
