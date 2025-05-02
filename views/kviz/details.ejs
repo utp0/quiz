@@ -2,6 +2,7 @@
 
 <p><strong>Leírás:</strong> <%= kviz.leiras || "Nincs megadva" %></p>
 <p><strong>Létrehozás dátuma:</strong> <%= new Date(kviz.letrehozas_datuma).toLocaleDateString("hu-HU") %></p>
-<p><strong>Készítette:</strong> <%= kviz.keszito || "Ismeretlen" %></p>
+<p><strong>Készítette:</strong> <%= kviz.felhasznalo_id || "Ismeretlen" %></p>
+<a href="/kviz/start/<%= kviz.id %>">Kitöltés</a>
 
 <a href="/kviz">Vissza a kvízekhez</a>

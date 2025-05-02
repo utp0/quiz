@@ -1,6 +1,7 @@
 const path = require("path");
 const express = require("express");
 const methodOverride = require('method-override');
+const quizController = require('./controllers/quizController');
 
 
 /**
@@ -131,6 +132,10 @@ app.get("/profile", async (req, res) => {
     );
 });
 
+app.get("/kviz/start/:id", quizController.startQuiz);
+
+app.post('/kviz/submit', quizController.submitQuiz);
+
 app.get("/tema", async (req, res) => {
     try {
         const temakorok = await getAllTemakor();
@@ -177,6 +182,19 @@ app.post("/tema", isAdmin, async (req, res) => {
         });
     }
 });
+
+const statisticsController = require('./controllers/statisticsController');
+
+app.get('/ranglista', statisticsController.showRankings);
+
+// Felhasználói statisztikák
+app.get('/statisztika/felhasznalo', statisticsController.showUserStatistics);
+
+// Kvíz statisztikák
+app.get('/statisztika/kviz/:id', statisticsController.showQuizStatistics);
+
+// Globális statisztikák
+app.get('/statisztika/globalis', statisticsController.showGlobalStatistics);
 
 app.get("/tema/:id/edit", isAdmin, async (req, res) => {
 

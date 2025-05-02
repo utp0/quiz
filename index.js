@@ -11,7 +11,6 @@ const cookieparser = require("cookie-parser");
 const methodOverride = require('method-override');
 const path = require('path');
 
-
 const app = express();
 
 app.use(cookieparser());
