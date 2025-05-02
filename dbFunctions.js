@@ -263,7 +263,17 @@ class DbFunctions {
     }
 
     static async getAllKviz() {
-        const sql = `SELECT id, nev, leiras, letrehozas_datuma FROM Kviz ORDER BY letrehozas_datuma DESC`;
+        const sql = `
+            SELECT
+                k.id,
+                k.nev,
+                k.leiras,
+                k.letrehozas_datuma,
+                f.FELHASZNALONEV AS keszito_nev
+            FROM Kviz k
+            LEFT JOIN FELHASZNALO f ON k.felhasznalo_id = f.ID
+            ORDER BY k.letrehozas_datuma DESC
+        `;
 
         try {
             const result = await DbFunctions.dbInstance().execute(sql, []);
@@ -272,7 +282,8 @@ class DbFunctions {
                 id: row[0],
                 nev: row[1],
                 leiras: row[2],
-                letrehozas_datuma: row[3]
+                letrehozas_datuma: row[3],
+                keszito_nev: row[4] || "Ismeretlen"
             }));
         } catch (e) {
             console.error("Hiba a kvízek lekérdezésénél:", e);
@@ -281,7 +292,18 @@ class DbFunctions {
     }
 
     static async getKvizById(id) {
-        const sql = `SELECT id, nev, leiras, letrehozas_datuma, felhasznalo_id FROM Kviz WHERE id = :1`;
+        const sql = `
+            SELECT
+                k.id,
+                k.nev,
+                k.leiras,
+                k.letrehozas_datuma,
+                k.felhasznalo_id,
+                f.FELHASZNALONEV AS keszito_nev
+            FROM Kviz k
+            LEFT JOIN FELHASZNALO f ON k.felhasznalo_id = f.ID
+            WHERE k.id = :1
+        `;
 
         try {
             const result = await DbFunctions.dbInstance().execute(sql, [id]);
@@ -296,7 +318,8 @@ class DbFunctions {
                 nev: row[1],
                 leiras: row[2],
                 letrehozas_datuma: row[3],
-                felhasznalo_id: row[4]
+                felhasznalo_id: row[4],
+                keszito_nev: row[5] || 'Ismeretlen'
             };
         } catch (e) {
             console.error("Hiba a kvíz lekérdezésénél:", e);
@@ -313,24 +336,6 @@ class DbFunctions {
             await DbFunctions.dbInstance().execute(sql, [nev, leiras, felhasznaloId], { autoCommit: true });
         } catch (e) {
             console.error("Hiba a kvíz létrehozásánál:", e);
-            throw e;
-        }
-    }
-
-    static async getKvizById(id) {
-        const sql = `SELECT id, nev, leiras, letrehozas_datuma FROM Kviz WHERE id = :1`;
-        try {
-            const result = await DbFunctions.dbInstance().execute(sql, [id]);
-            if (result.rows.length === 0) return null;
-
-            return {
-                id: result.rows[0][0],
-                nev: result.rows[0][1],
-                leiras: result.rows[0][2],
-                letrehozas_datuma: result.rows[0][3],
-            };
-        } catch (e) {
-            console.error("Hiba a kvíz lekérdezésénél:", e);
             throw e;
         }
     }
