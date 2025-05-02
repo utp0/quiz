@@ -12,24 +12,25 @@
     </thead>
     <tbody>
         <% if (jatekszobak && jatekszobak.length > 0) { %>
-            <% jatekszobak.forEach(szoba => { %>
-                <tr>
-                    <td><%= szoba.NEV %></td>
-                    <td><%= szoba.MAX_JATEKOS %></td>
-                    <td>
-                        <% if(locals.currentUser && locals.currentUser["JOGOSULTSAG"] == "admin") { %>
-                        <form action="/jatekszoba/<%= szoba.ID %>" method="POST">
-                            <input type="hidden" name="_method" value="DELETE">
-                            <button type="submit">Törlés</button>
-                        </form>
-                        <% } %>
-                    </td>
-                </tr>
-            <% }) %>
+        <% jatekszobak.forEach(szoba => { %>
+        <tr>
+            <td><%= szoba.NEV %></td>
+            <td><%= szoba.MAX_JATEKOS %></td>
+            <td>
+                <% if(locals.currentUser && (locals.currentUser["JOGOSULTSAG"] == "admin" || locals.currentUser["ID"] == szoba.FELHASZNALO_ID)) { %>
+                <a href="/jatekszoba/<%= szoba.ID %>/edit" style="margin-right: 5px;">Szerkesztés</a>
+                <form action="/jatekszoba/<%= szoba.ID %>" method="POST">
+                    <input type="hidden" name="_method" value="DELETE">
+                    <button type="submit">Törlés</button>
+                </form>
+                <% } %>
+            </td>
+        </tr>
+        <% }) %>
         <% } else { %>
-            <tr>
-                <td colspan="3">Nincsenek játékszobák</td>
-            </tr>
+        <tr>
+            <td colspan="3">Nincsenek játékszobák</td>
+        </tr>
         <% } %>
     </tbody>
 </table>

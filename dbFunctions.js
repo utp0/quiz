@@ -455,7 +455,7 @@ class DbFunctions {
     }
 
     static async getAllJatekszoba() {
-        const sql = `SELECT ID, NEV, MAX_JATEKOS FROM Jatekszoba ORDER BY NEV`;
+        const sql = `SELECT ID, NEV, MAX_JATEKOS, FELHASZNALO_ID FROM Jatekszoba ORDER BY NEV`;
         try {
             const result = await DbFunctions.dbInstance().execute(sql, [], { outFormat: oracledb.OUT_FORMAT_OBJECT });
             return result.rows;
@@ -488,6 +488,44 @@ class DbFunctions {
             console.log(`Új játékszoba létrehozva: ${nev}`);
         } catch (e) {
             console.error("Hiba a játékszoba létrehozásakor:", e);
+            throw e;
+        }
+    }
+
+    static async getJatekszobaById(id) {
+        const sql = `SELECT ID, NEV, MAX_JATEKOS, FELHASZNALO_ID FROM Jatekszoba WHERE id = :1`;
+        try {
+            const result = await DbFunctions.dbInstance().execute(sql, [id], {
+                maxRows: 1,
+                outFormat: oracledb.OUT_FORMAT_OBJECT
+            });
+
+            if (result.rows.length === 0) {
+                return null;
+            }
+
+            return result.rows[0];
+        } catch (e) {
+            console.error("Hiba a játékszoba lekérdezésekor:", e);
+            throw e;
+        }
+    }
+
+    static async updateJatekszoba(id, nev, maxJatekos) {
+        if (isNaN(maxJatekos) || maxJatekos < 2) {
+            throw new Error("A maximális játékosok számának legalább 2-nek kell lennie.");
+        }
+
+        const updateSql = `UPDATE Jatekszoba SET nev = :1, max_jatekos = :2 WHERE id = :3`;
+        try {
+            const result = await DbFunctions.dbInstance().execute(updateSql, [nev, maxJatekos, id]);
+            if (result.rowsAffected === 0) {
+                throw new Error("A játékszoba nem található a frissítéshez!");
+            }
+            console.log(`Játékszoba frissítve: ${nev} (ID: ${id})`);
+            return true;
+        } catch (e) {
+            console.error("Hiba a játékszoba frissítésekor:", e);
             throw e;
         }
     }
@@ -539,7 +577,7 @@ class DbFunctions {
                 }
             );
             return result.rows ?? null;
-        } catch(e) {
+        } catch (e) {
             console.error(`Hiba felhasználói statisztikák lekérésekor! userId: ${userId}`, e);
             return null;
         }
