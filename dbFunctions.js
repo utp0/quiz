@@ -53,6 +53,29 @@ class DbFunctions {
         const isCorrect = bcrypt.compareSync(plainpass, potential["JELSZO"]);
         if (!isCorrect) return null;
         authedUser = potential;
+
+        /* Felhasználó bejelentkezésének logolása tárolt eljárással */
+
+        try {
+            const logSql = `BEGIN :ret := LOG_USER_LOGIN(:user_id); END;`;
+            const logParams = {
+                ret: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
+                user_id: authedUser["ID"]
+            };
+            const logResult = await DbFunctions.dbInstance().execute(logSql, logParams);
+
+            if (logResult.outBinds.ret !== 1) {
+                console.error(`DB eljárás LOG_USER_LOGIN sikertelen, user ID: ${authedUser["ID"]}`);
+            } else {
+                // console.log("sikerült jóvan")
+            }
+        } catch (logError) {
+            console.error(`Nem sikerült a LOG_USER_LOIGN, user ID: ${authedUser["ID"]}:`, logError);
+        }
+
+        /* ======================================================== */
+
+
         // token
         /**
          * @type {Array}
