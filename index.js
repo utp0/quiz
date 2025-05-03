@@ -6,10 +6,23 @@ _dbInstance.openDB().then(async () => {
     console.log("Adatbázis kapcsolat létrejött!");
 });
 
+const fs = require("fs");
+const path = require("path");
+//jank{
+try {
+    const tokenPath = path.join(__dirname, (process.env.TOKENPATH || "./tokens.json"));
+    if (!fs.existsSync(tokenPath)) {
+        fs.writeFileSync(tokenPath, "[]", { encoding: "utf-8" });
+        console.debug("\"Üres\" tokens.json fájl létrehozva.");
+    }
+} catch (error) {
+    console.warn("\"Üres\" tokens.json fájl létrehozása nem sikerült.\n", error);
+}
+//}
+
 const express = require("express");
 const cookieparser = require("cookie-parser");
 const methodOverride = require('method-override');
-const path = require('path');
 
 const app = express();
 
