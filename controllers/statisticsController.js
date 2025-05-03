@@ -365,29 +365,29 @@ exports.showGlobalStatistics = async (req, res) => {
             ageStats = (await connection.execute(
                 `SELECT 
                     CASE 
-                        WHEN EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM SZULETESI_EV) < 18 THEN '18 alatt'
-                        WHEN EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM SZULETESI_EV) BETWEEN 18 AND 25 THEN '18-25'
-                        WHEN EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM SZULETESI_EV) BETWEEN 26 AND 35 THEN '26-35'
-                        WHEN EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM SZULETESI_EV) BETWEEN 36 AND 50 THEN '36-50'
+                        WHEN (EXTRACT(YEAR FROM CURRENT_DATE) - TO_NUMBER(SZULETESI_EV)) < 18 THEN '18 alatt'
+                        WHEN (EXTRACT(YEAR FROM CURRENT_DATE) - TO_NUMBER(SZULETESI_EV)) BETWEEN 18 AND 25 THEN '18-25'
+                        WHEN (EXTRACT(YEAR FROM CURRENT_DATE) - TO_NUMBER(SZULETESI_EV)) BETWEEN 26 AND 35 THEN '26-35'
+                        WHEN (EXTRACT(YEAR FROM CURRENT_DATE) - TO_NUMBER(SZULETESI_EV)) BETWEEN 36 AND 50 THEN '36-50'
                         ELSE '50 felett'
                     END AS KORCSOPORT,
                     COUNT(DISTINCT f.ID) AS FELHASZNALOK_SZAMA,
                     AVG(r.OSSZPONTSZAM) AS ATLAG_PONTSZAM
-                 FROM 
+                FROM 
                     FELHASZNALO f
-                 LEFT JOIN 
+                LEFT JOIN 
                     RANGLISTA r ON f.ID = r.FELHASZNALO_ID
-                 WHERE
+                WHERE
                     f.SZULETESI_EV IS NOT NULL
-                 GROUP BY 
+                GROUP BY 
                     CASE 
-                        WHEN EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM SZULETESI_EV) < 18 THEN '18 alatt'
-                        WHEN EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM SZULETESI_EV) BETWEEN 18 AND 25 THEN '18-25'
-                        WHEN EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM SZULETESI_EV) BETWEEN 26 AND 35 THEN '26-35'
-                        WHEN EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM SZULETESI_EV) BETWEEN 36 AND 50 THEN '36-50'
+                        WHEN (EXTRACT(YEAR FROM CURRENT_DATE) - TO_NUMBER(SZULETESI_EV)) < 18 THEN '18 alatt'
+                        WHEN (EXTRACT(YEAR FROM CURRENT_DATE) - TO_NUMBER(SZULETESI_EV)) BETWEEN 18 AND 25 THEN '18-25'
+                        WHEN (EXTRACT(YEAR FROM CURRENT_DATE) - TO_NUMBER(SZULETESI_EV)) BETWEEN 26 AND 35 THEN '26-35'
+                        WHEN (EXTRACT(YEAR FROM CURRENT_DATE) - TO_NUMBER(SZULETESI_EV)) BETWEEN 36 AND 50 THEN '36-50'
                         ELSE '50 felett'
                     END
-                 ORDER BY 
+                ORDER BY 
                     CASE KORCSOPORT
                         WHEN '18 alatt' THEN 1
                         WHEN '18-25' THEN 2
