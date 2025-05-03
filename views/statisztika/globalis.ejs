@@ -1,0 +1,145 @@
+<div class="container mt-5">
+    <h1 class="text-center mb-5">Globális Statisztikák</h1>
+
+    <div class="row">
+        <!-- Témakörök népszerűsége -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">Témakörök népszerűsége</h3>
+                </div>
+                <div class="card-body">
+                    <% if (categoryPopularity && categoryPopularity.length > 0) { %>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Témakör</th>
+                                        <th>Kitöltések száma</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% categoryPopularity.forEach(category => { %>
+                                    <tr>
+                                        <td><%= category.TEMAKOR_NEV %></td>
+                                        <td><%= category.KITOLTES_SZAMA %></td>
+                                    </tr>
+                                    <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+                    <% } else { %>
+                        <p class="text-center">Nincs megjeleníthető adat.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Legnépszerűbb kvízek -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h3 class="card-title mb-0">Legnépszerűbb kvízek</h3>
+                </div>
+                <div class="card-body">
+                    <% if (popularQuizzes && popularQuizzes.length > 0) { %>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Kvíz</th>
+                                        <th>Kitöltések</th>
+                                        <th>Átlag pontszám</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% popularQuizzes.forEach(quiz => { %>
+                                    <tr>
+                                        <td><%= quiz.NEV %></td>
+                                        <td><%= quiz.KITOLTES_SZAMA %></td>
+                                        <td><%= quiz.ATLAG_PONTSZAM ? quiz.ATLAG_PONTSZAM.toFixed(2) : 'N/A' %></td>
+                                    </tr>
+                                    <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+                    <% } else { %>
+                        <p class="text-center">Nincs megjeleníthető adat.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Legaktívabb felhasználók -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h3 class="card-title mb-0">Legaktívabb felhasználók</h3>
+                </div>
+                <div class="card-body">
+                    <% if (activeUsers && activeUsers.length > 0) { %>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Felhasználónév</th>
+                                        <th>Kitöltések száma</th>
+                                        <th>Összpontszám</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% activeUsers.forEach(user => { %>
+                                    <tr>
+                                        <td><%= user.FELHASZNALONEV %></td>
+                                        <td><%= user.KITOLTES_SZAMA %></td>
+                                        <td><%= user.OSSZPONTSZAM || 0 %></td>
+                                    </tr>
+                                    <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+                    <% } else { %>
+                        <p class="text-center">Nincs megjeleníthető adat.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Korosztályos statisztikák -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="card-title mb-0">Korosztályos statisztikák</h3>
+                </div>
+                <div class="card-body">
+                    <% if (ageStats && ageStats.length > 0) { %>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Korcsoport</th>
+                                        <th>Felhasználók száma</th>
+                                        <th>Átlag pontszám</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% ageStats.forEach(age => { %>
+                                    <tr>
+                                        <td><%= age.KORCSOPORT %></td>
+                                        <td><%= age.FELHASZNALOK_SZAMA %></td>
+                                        <td><%= age.ATLAG_PONTSZAM ? age.ATLAG_PONTSZAM.toFixed(2) : 'N/A' %></td>
+                                    </tr>
+                                    <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+                    <% } else { %>
+                        <p class="text-center">Nincs megjeleníthető korosztályos adat.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

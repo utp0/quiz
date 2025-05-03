@@ -1,0 +1,148 @@
+<div class="container mt-4">
+    <h1 class="mb-4">Felhasználói statisztikák</h1>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="card-title">Alapadatok</h2>
+        </div>
+        <div class="card-body">
+            <p><strong>Felhasználónév:</strong> <%= user.FELHASZNALONEV %></p>
+            <p><strong>E-mail cím:</strong> <%= user.EMAIL %></p>
+            <% if (user.SZULETESI_EV) { %>
+                <p><strong>Születési év:</strong> <%= user.SZULETESI_EV %></p>
+            <% } %>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="card-title">Ranglista pozíció</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 text-center">
+                    <div class="display-4"><%= rankInfo.HELYEZES %></div>
+                    <p>Helyezés</p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="display-4"><%= rankInfo.OSSZPONTSZAM %></div>
+                    <p>Összpontszám</p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="display-4"><%= rankInfo.OSSZES_JATEKOS %></div>
+                    <p>Összes játékos</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 class="card-title">Kvíz statisztikák</h2>
+                </div>
+                <div class="card-body">
+                    <% if (stats && stats.length > 0) { %>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Kvíz neve</th>
+                                        <th>Átlagos kitöltési idő</th>
+                                        <th>Helyes válaszok aránya</th>
+                                        <th>Kitöltések száma</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% stats.forEach(stat => { %>
+                                        <tr>
+                                            <td><%= stat.KVIZ_NEV %></td>
+                                            <td><%= stat.ATLAGOS_KITOLTESI_IDO %> másodperc</td>
+                                            <td><%= Math.round(stat.HELYES_VALASZOK_ARANYA * 100) %>%</td>
+                                            <td><%= stat.KITOLTES_SZAMA %></td>
+                                        </tr>
+                                    <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+                    <% } else { %>
+                        <p>Még nincs kvíz statisztika.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h2 class="card-title">Témakör szerinti statisztikák</h2>
+                </div>
+                <div class="card-body">
+                    <% if (categoryStats && categoryStats.length > 0) { %>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Témakör</th>
+                                        <th>Kitöltések száma</th>
+                                        <th>Átlag pontszám</th>
+                                        <th>Legjobb pontszám</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% categoryStats.forEach(cat => { %>
+                                        <tr>
+                                            <td><%= cat.TEMAKOR_NEV %></td>
+                                            <td><%= cat.KITOLTES_SZAMA %></td>
+                                            <td><%= Math.round(cat.ATLAG_PONTSZAM * 10) / 10 %></td>
+                                            <td><%= cat.LEGJOBB_PONTSZAM %></td>
+                                        </tr>
+                                    <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+                    <% } else { %>
+                        <p>Még nincs témakör szerinti statisztika.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="card-title">Korábbi kvíz eredmények</h2>
+        </div>
+        <div class="card-body">
+            <% if (results && results.length > 0) { %>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Kvíz neve</th>
+                                <th>Pontszám</th>
+                                <th>Időpont</th>
+                                <th>Részletek</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% results.forEach(result => { %>
+                                <tr>
+                                    <td><%= result.KVIZ_NEV %></td>
+                                    <td><%= result.PONTSZAM %></td>
+                                    <td><%= new Date(result.IDOBELYEG).toLocaleString('hu-HU') %></td>
+                                    <td>
+                                        <a href="/eredmeny/<%= result.ID %>" class="btn btn-sm btn-outline-primary">Részletek</a>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } else { %>
+                <p>Még nincs korábbi kvíz eredmény.</p>
+            <% } %>
+        </div>
+    </div>
+</div>

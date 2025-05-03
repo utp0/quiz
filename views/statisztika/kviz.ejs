@@ -1,0 +1,154 @@
+<div class="container mt-4">
+    <h1 class="mb-4">Kvíz statisztikák</h1>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="card-title"><%= quiz.NEV %></h2>
+        </div>
+        <div class="card-body">
+            <p class="mb-3"><strong>Témakör:</strong> <%= quiz.TEMAKOR_NEV %></p>
+            <% if (quiz.LEIRAS) { %>
+                <p class="mb-3"><strong>Leírás:</strong> <%= quiz.LEIRAS %></p>
+            <% } %>
+            <p><strong>Kérdések száma:</strong> <%= quiz.KERDESEK_SZAMA %></p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="card-title">Kitöltési statisztikák</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6 col-md-3 text-center mb-3">
+                            <div class="h3"><%= completionStats.KITOLTES_SZAMA || 0 %></div>
+                            <p>Kitöltések száma</p>
+                        </div>
+                        <div class="col-6 col-md-3 text-center mb-3">
+                            <div class="h3"><%= Math.round((completionStats.ATLAG_PONTSZAM || 0) * 10) / 10 %></div>
+                            <p>Átlag pontszám</p>
+                        </div>
+                        <div class="col-6 col-md-3 text-center mb-3">
+                            <div class="h3"><%= completionStats.LEGJOBB_PONTSZAM || 0 %></div>
+                            <p>Legjobb pontszám</p>
+                        </div>
+                        <div class="col-6 col-md-3 text-center mb-3">
+                            <div class="h3"><%= completionStats.LEGROSSZABB_PONTSZAM || 0 %></div>
+                            <p>Legrosszabb pontszám</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="card-title">Nehézség szerinti statisztikák</h3>
+                </div>
+                <div class="card-body">
+                    <% if (difficultyStats && difficultyStats.length > 0) { %>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Nehézségi szint</th>
+                                        <th>Kérdések száma</th>
+                                        <th>Helyes válaszlehetőségek száma</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% 
+                                    // Csoportosítjuk a nehézségi szintek szerint
+                                    const difficultyGroups = {};
+                                    difficultyStats.forEach(stat => {
+                                        if (!difficultyGroups[stat.NEHEZSEGI_SZINT]) {
+                                            difficultyGroups[stat.NEHEZSEGI_SZINT] = {
+                                                kerdesek: 0,
+                                                helyes: 0
+                                            };
+                                        }
+                                        difficultyGroups[stat.NEHEZSEGI_SZINT].kerdesek += 1;
+                                        difficultyGroups[stat.NEHEZSEGI_SZINT].helyes += (stat.HELYES_VALASZOK_SZAMA || 0);
+                                    });
+                                    
+                                    Object.keys(difficultyGroups).sort((a, b) => a - b).forEach(szint => {
+                                        const group = difficultyGroups[szint];
+                                    %>
+                                        <tr>
+                                            <td>
+                                                <% if (parseInt(szint) === 1) { %>
+                                                    Könnyű
+                                                <% } else if (parseInt(szint) === 2) { %>
+                                                    Közepes
+                                                <% } else if (parseInt(szint) === 3) { %>
+                                                    Nehéz
+                                                <% } else { %>
+                                                    <%= szint %>
+                                                <% } %>
+                                            </td>
+                                            <td><%= group.kerdesek %></td>
+                                            <td><%= group.helyes %></td>
+                                        </tr>
+                                    <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <% if (statsFromStatsTable && statsFromStatsTable.ATLAGOS_HELYES_VALASZ_ARANY !== null) { %>
+                            <div class="alert alert-info mt-3">
+                                <p class="mb-0">
+                                    <strong>Átlagos helyes válasz arány:</strong> 
+                                    <%= Math.round(statsFromStatsTable.ATLAGOS_HELYES_VALASZ_ARANY * 100) %>%
+                                </p>
+                            </div>
+                        <% } %>
+                    <% } else { %>
+                        <p>Nincs elérhető nehézségi szint szerinti statisztika.</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3 class="card-title">Top 10 eredmény</h3>
+        </div>
+        <div class="card-body">
+            <% if (topResults && topResults.length > 0) { %>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Felhasználó</th>
+                                <th>Pontszám</th>
+                                <th>Időpont</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% topResults.forEach((result, index) => { %>
+                                <tr>
+                                    <td><%= index + 1 %></td>
+                                    <td><%= result.FELHASZNALO_NEV %></td>
+                                    <td><%= result.PONTSZAM %></td>
+                                    <td><%= new Date(result.IDOBELYEG).toLocaleString('hu-HU') %></td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } else { %>
+                <p>Még nincs eredmény ehhez a kvízhez.</p>
+            <% } %>
+        </div>
+    </div>
+
+    <div class="text-center mt-4 mb-5">
+        <a href="/kviz" class="btn btn-primary me-2">Vissza a kvízekhez</a>
+        <a href="/statisztika/globalis" class="btn btn-outline-secondary">Globális statisztikák</a>
+    </div>
+</div>

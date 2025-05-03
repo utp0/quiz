@@ -20,9 +20,9 @@ exports.startQuiz = async (req, res) => {
              FROM 
                 Kerdes k
              JOIN 
-                Valasz v ON k.id = v.Kerdes_id
+                Valasz v ON k.id = v.kerdes_id
              WHERE 
-                k.Kviz_id = :quizId
+                k.kviz_id = :quizId
              ORDER BY 
                 k.id`,
             [quizId],

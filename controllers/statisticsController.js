@@ -173,21 +173,32 @@ exports.showQuizStatistics = async (req, res) => {
         
         // Kvíz alapadatainak lekérdezése
         const quizResult = await connection.execute(
-            `SELECT 
-                k.NEV, 
-                k.LEIRAS,
-                t.NEV AS TEMAKOR_NEV,
+            `WITH QUIZ_DATA AS (
+                SELECT 
+                    k.ID,
+                    k.NEV, 
+                    k.LEIRAS,
+                    (
+                        SELECT t.NEV 
+                        FROM TEMAKOR t 
+                        JOIN KERDES_TEMAKOR kt ON t.ID = kt.TEMAKOR_ID 
+                        JOIN KERDES ker ON kt.KERDES_ID = ker.ID 
+                        WHERE ker.KVIZ_ID = k.ID 
+                        GROUP BY t.NEV 
+                        ORDER BY COUNT(*) DESC 
+                        FETCH FIRST 1 ROW ONLY
+                    ) AS TEMAKOR_NEV
+                FROM KVIZ k
+                WHERE k.ID = :quizId
+            )
+            SELECT 
+                qd.NEV,
+                qd.LEIRAS,
+                qd.TEMAKOR_NEV,
                 COUNT(ker.ID) AS KERDESEK_SZAMA
-             FROM 
-                KVIZ k
-             JOIN 
-                TEMAKOR t ON k.TEMAKOR_ID = t.ID
-             LEFT JOIN
-                KERDES ker ON ker.KVIZ_ID = k.ID
-             WHERE 
-                k.ID = :quizId
-             GROUP BY
-                k.NEV, k.LEIRAS, t.NEV`,
+            FROM QUIZ_DATA qd
+            LEFT JOIN KERDES ker ON ker.KVIZ_ID = qd.ID
+            GROUP BY qd.NEV, qd.LEIRAS, qd.TEMAKOR_NEV`,
             [quizId],
             { outFormat: oracledb.OUT_FORMAT_OBJECT }
         );
@@ -216,7 +227,7 @@ exports.showQuizStatistics = async (req, res) => {
         // Top 10 eredmény a kvízhez
         const topResults = await connection.execute(
             `SELECT 
-                f.FELHASZNALO_NEV,
+                f.FELHASZNALONEV AS FELHASZNALO_NEV,
                 e.PONTSZAM,
                 e.IDOBELYEG
              FROM 
@@ -232,25 +243,35 @@ exports.showQuizStatistics = async (req, res) => {
             { outFormat: oracledb.OUT_FORMAT_OBJECT }
         );
         
-        // Nehézségi szint szerinti pontszám átlagok
+        // Nehézségi szint szerinti statisztikák
         const difficultyStats = await connection.execute(
             `SELECT 
                 k.NEHEZSEGI_SZINT,
-                AVG(CASE WHEN v.HELYES = 1 THEN 1 ELSE 0 END) AS HELYES_VALASZOK_ARANYA
+                COUNT(k.ID) AS KERDESEK_SZAMA,
+                (
+                    SELECT COUNT(*) 
+                    FROM VALASZ v 
+                    WHERE v.KERDES_ID = k.ID AND v.HELYES = 1
+                ) AS HELYES_VALASZOK_SZAMA
              FROM 
                 KERDES k
-             JOIN 
-                VALASZ v ON k.ID = v.KERDES_ID
-             LEFT JOIN 
-                EREDMENY_VALASZ ev ON v.ID = ev.VALASZ_ID
-             LEFT JOIN
-                EREDMENY e ON ev.EREDMENY_ID = e.ID
              WHERE 
                 k.KVIZ_ID = :quizId
              GROUP BY 
-                k.NEHEZSEGI_SZINT
+                k.NEHEZSEGI_SZINT, k.ID
              ORDER BY 
                 k.NEHEZSEGI_SZINT`,
+            [quizId],
+            { outFormat: oracledb.OUT_FORMAT_OBJECT }
+        );
+        
+        const statsFromStatsTable = await connection.execute(
+            `SELECT 
+                AVG(s.HELYES_VALASZOK_ARANYA) AS ATLAGOS_HELYES_VALASZ_ARANY
+             FROM 
+                STATISZTIKA s
+             WHERE 
+                s.KVIZ_ID = :quizId`,
             [quizId],
             { outFormat: oracledb.OUT_FORMAT_OBJECT }
         );
@@ -259,7 +280,8 @@ exports.showQuizStatistics = async (req, res) => {
             quiz: quiz,
             completionStats: completionStats.rows[0],
             topResults: topResults.rows,
-            difficultyStats: difficultyStats.rows
+            difficultyStats: difficultyStats.rows,
+            statsFromStatsTable: statsFromStatsTable.rows[0]
         });
         
     } catch (err) {
@@ -273,20 +295,25 @@ exports.showGlobalStatistics = async (req, res) => {
         const connection = getInstance();
         
         // Témakörök népszerűsége (kitöltések száma szerint)
+        //nem jo lekerdezes (k.temakor_id)
         const categoryPopularity = await connection.execute(
             `SELECT 
                 t.NEV AS TEMAKOR_NEV,
-                COUNT(e.ID) AS KITOLTES_SZAMA
-             FROM 
+                COUNT(DISTINCT e.ID) AS KITOLTES_SZAMA
+            FROM 
                 TEMAKOR t
-             LEFT JOIN 
-                KVIZ k ON t.ID = k.TEMAKOR_ID
-             LEFT JOIN 
+            LEFT JOIN 
+                KERDES_TEMAKOR kt ON t.ID = kt.TEMAKOR_ID
+            LEFT JOIN 
+                KERDES ker ON kt.KERDES_ID = ker.ID
+            LEFT JOIN 
+                KVIZ k ON ker.KVIZ_ID = k.ID
+            LEFT JOIN 
                 EREDMENY e ON k.ID = e.KVIZ_ID
-             GROUP BY 
+            GROUP BY 
                 t.NEV
-             ORDER BY 
-                COUNT(e.ID) DESC`,
+            ORDER BY 
+                COUNT(DISTINCT e.ID) DESC`,
             [],
             { outFormat: oracledb.OUT_FORMAT_OBJECT }
         );
@@ -314,7 +341,7 @@ exports.showGlobalStatistics = async (req, res) => {
         // Legaktívabb felhasználók
         const activeUsers = await connection.execute(
             `SELECT 
-                f.FELHASZNALO_NEV,
+                f.FELHASZNALONEV,
                 COUNT(e.ID) AS KITOLTES_SZAMA,
                 r.OSSZPONTSZAM
              FROM 
@@ -324,7 +351,7 @@ exports.showGlobalStatistics = async (req, res) => {
              LEFT JOIN
                 RANGLISTA r ON f.ID = r.FELHASZNALO_ID
              GROUP BY 
-                f.FELHASZNALO_NEV, r.OSSZPONTSZAM
+                f.FELHASZNALONEV, r.OSSZPONTSZAM
              ORDER BY 
                 COUNT(e.ID) DESC
              FETCH FIRST 10 ROWS ONLY`,
@@ -338,10 +365,10 @@ exports.showGlobalStatistics = async (req, res) => {
             ageStats = (await connection.execute(
                 `SELECT 
                     CASE 
-                        WHEN EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM SZULETESI_DATUM) < 18 THEN '18 alatt'
-                        WHEN EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM SZULETESI_DATUM) BETWEEN 18 AND 25 THEN '18-25'
-                        WHEN EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM SZULETESI_DATUM) BETWEEN 26 AND 35 THEN '26-35'
-                        WHEN EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM SZULETESI_DATUM) BETWEEN 36 AND 50 THEN '36-50'
+                        WHEN EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM SZULETESI_EV) < 18 THEN '18 alatt'
+                        WHEN EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM SZULETESI_EV) BETWEEN 18 AND 25 THEN '18-25'
+                        WHEN EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM SZULETESI_EV) BETWEEN 26 AND 35 THEN '26-35'
+                        WHEN EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM SZULETESI_EV) BETWEEN 36 AND 50 THEN '36-50'
                         ELSE '50 felett'
                     END AS KORCSOPORT,
                     COUNT(DISTINCT f.ID) AS FELHASZNALOK_SZAMA,
@@ -351,13 +378,13 @@ exports.showGlobalStatistics = async (req, res) => {
                  LEFT JOIN 
                     RANGLISTA r ON f.ID = r.FELHASZNALO_ID
                  WHERE
-                    f.SZULETESI_DATUM IS NOT NULL
+                    f.SZULETESI_EV IS NOT NULL
                  GROUP BY 
                     CASE 
-                        WHEN EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM SZULETESI_DATUM) < 18 THEN '18 alatt'
-                        WHEN EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM SZULETESI_DATUM) BETWEEN 18 AND 25 THEN '18-25'
-                        WHEN EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM SZULETESI_DATUM) BETWEEN 26 AND 35 THEN '26-35'
-                        WHEN EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM SZULETESI_DATUM) BETWEEN 36 AND 50 THEN '36-50'
+                        WHEN EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM SZULETESI_EV) < 18 THEN '18 alatt'
+                        WHEN EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM SZULETESI_EV) BETWEEN 18 AND 25 THEN '18-25'
+                        WHEN EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM SZULETESI_EV) BETWEEN 26 AND 35 THEN '26-35'
+                        WHEN EXTRACT(YEAR FROM CURRENT_DATE) - EXTRACT(YEAR FROM SZULETESI_EV) BETWEEN 36 AND 50 THEN '36-50'
                         ELSE '50 felett'
                     END
                  ORDER BY 
