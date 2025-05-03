@@ -88,7 +88,9 @@ CREATE TABLE Jatekszoba (
     max_jatekos NUMBER NOT NULL,
     aktiv_allapot NUMBER(1) DEFAULT 1,
     letrehozas_datum DATE DEFAULT SYSDATE,
-    FOREIGN KEY (felhasznalo_id) REFERENCES Felhasznalo(id) ON DELETE CASCADE
+    kviz_id NUMBER NOT NULL,
+    FOREIGN KEY (felhasznalo_id) REFERENCES Felhasznalo(id) ON DELETE CASCADE,
+    FOREIGN KEY (kviz_id) REFERENCES Kviz(id) ON DELETE CASCADE
 );
 
 CREATE TABLE Temakor (
@@ -111,8 +113,10 @@ CREATE TABLE Eredmeny (
     kviz_id NUMBER NOT NULL,
     pontszam NUMBER NOT NULL,
     idobelyeg TIMESTAMP DEFAULT SYSTIMESTAMP,
+    jatekszoba_id NUMBER DEFAULT NULL,
     FOREIGN KEY (felhasznalo_id) REFERENCES Felhasznalo(id) ON DELETE CASCADE,
-    FOREIGN KEY (kviz_id) REFERENCES Kviz(id) ON DELETE CASCADE
+    FOREIGN KEY (kviz_id) REFERENCES Kviz(id) ON DELETE CASCADE,
+    FOREIGN KEY (jatekszoba_id) REFERENCES Jatekszoba(id) ON DELETE SET NULL
 );
 
 CREATE TABLE Valasz (
@@ -393,11 +397,11 @@ INSERT INTO Ranglista (felhasznalo_id, osszpontszam) VALUES (7, 580);
 INSERT INTO Ranglista (felhasznalo_id, osszpontszam) VALUES (8, 560);
 
 -- Jatekszoba tábla
-INSERT INTO Jatekszoba (nev, felhasznalo_id, max_jatekos) VALUES ('Történelem Szoba', 1, 10);
-INSERT INTO Jatekszoba (nev, felhasznalo_id, max_jatekos) VALUES ('Tudományos Szoba', 4, 15);
-INSERT INTO Jatekszoba (nev, felhasznalo_id, max_jatekos) VALUES ('Művészet Szoba', 7, 8);
-INSERT INTO Jatekszoba (nev, felhasznalo_id, max_jatekos) VALUES ('Földrajz Szoba', 1, 12);
-INSERT INTO Jatekszoba (nev, felhasznalo_id, max_jatekos) VALUES ('Irodalom Szoba', 4, 10);
+INSERT INTO Jatekszoba (nev, felhasznalo_id, max_jatekos, kviz_id) VALUES ('Történelem Szoba', 1, 10, 3);
+INSERT INTO Jatekszoba (nev, felhasznalo_id, max_jatekos, kviz_id) VALUES ('Tudományos Szoba', 4, 15, 3);
+INSERT INTO Jatekszoba (nev, felhasznalo_id, max_jatekos, kviz_id) VALUES ('Művészet Szoba', 7, 8, 3);
+INSERT INTO Jatekszoba (nev, felhasznalo_id, max_jatekos, kviz_id) VALUES ('Földrajz Szoba', 1, 12, 3);
+INSERT INTO Jatekszoba (nev, felhasznalo_id, max_jatekos, kviz_id) VALUES ('Irodalom Szoba', 4, 10, 3);
 
 -- Temakor tábla
 INSERT INTO Temakor (nev) VALUES ('Történelem');
