@@ -483,7 +483,14 @@ class DbFunctions {
     }
 
     static async getAllJatekszoba() {
-        const sql = `SELECT ID, NEV, MAX_JATEKOS, FELHASZNALO_ID FROM Jatekszoba ORDER BY NEV`;
+        const sql = `
+            SELECT
+                js.ID, js.NEV, js.MAX_JATEKOS, js.FELHASZNALO_ID, js.KVIZ_ID,
+                kv.NEV AS KVIZ_NEV
+            FROM Jatekszoba js
+            LEFT JOIN Kviz kv ON js.kviz_id = kv.id
+            ORDER BY js.NEV
+        `;
         try {
             const result = await DbFunctions.dbInstance().execute(sql, [], { outFormat: oracledb.OUT_FORMAT_OBJECT });
             return result.rows;
@@ -494,8 +501,11 @@ class DbFunctions {
     }
 
 
-    static async createJatekszoba(nev, felhasznaloId, maxJatekos) {
+    static async createJatekszoba(nev, felhasznaloId, maxJatekos, kvizId) {
         const checkSql = `SELECT COUNT(*) FROM Jatekszoba WHERE nev = :1`;
+        if (!nev || !felhasznaloId || !maxJatekos || !kvizId || maxJatekos < 2) {
+            throw new Error("Hiányos vagy érvénytelen adatok a játékszoba létrehozásához.");
+        }
         try {
             const checkResult = await DbFunctions.dbInstance().execute(checkSql, [nev]);
             if (checkResult.rows[0][0] > 0) {
@@ -507,10 +517,10 @@ class DbFunctions {
             // const nextId = idResult.rows[0][0];
 
             const insertSql = `
-                INSERT INTO Jatekszoba (nev, felhasznalo_id, max_jatekos)
-                VALUES (:1, :2, :3)
+                INSERT INTO Jatekszoba (nev, felhasznalo_id, max_jatekos, kviz_id)
+                VALUES (:1, :2, :3, :4)
             `;
-            await DbFunctions.dbInstance().execute(insertSql, [nev, felhasznaloId, maxJatekos]);
+            await DbFunctions.dbInstance().execute(insertSql, [nev, felhasznaloId, maxJatekos, kvizId]);
             await DbFunctions.dbInstance().commit();
 
             console.log(`Új játékszoba létrehozva: ${nev}`);
@@ -521,7 +531,14 @@ class DbFunctions {
     }
 
     static async getJatekszobaById(id) {
-        const sql = `SELECT ID, NEV, MAX_JATEKOS, FELHASZNALO_ID FROM Jatekszoba WHERE id = :1`;
+        const sql = `
+            SELECT
+                js.ID, js.NEV, js.MAX_JATEKOS, js.FELHASZNALO_ID, js.KVIZ_ID,
+                kv.NEV AS KVIZ_NEV
+            FROM Jatekszoba js
+            LEFT JOIN Kviz kv ON js.kviz_id = kv.id
+            WHERE js.id = :1
+        `;
         try {
             const result = await DbFunctions.dbInstance().execute(sql, [id], {
                 maxRows: 1,
@@ -539,14 +556,14 @@ class DbFunctions {
         }
     }
 
-    static async updateJatekszoba(id, nev, maxJatekos) {
-        if (isNaN(maxJatekos) || maxJatekos < 2) {
-            throw new Error("A maximális játékosok számának legalább 2-nek kell lennie.");
+    static async updateJatekszoba(id, nev, maxJatekos, kvizId) {
+        if (!nev || !felhasznaloId || !maxJatekos || !kvizId || maxJatekos < 2) {
+            throw new Error("Hiányos vagy érvénytelen adatok a játékszoba létrehozásához.");
         }
 
-        const updateSql = `UPDATE Jatekszoba SET nev = :1, max_jatekos = :2 WHERE id = :3`;
+        const updateSql = `UPDATE Jatekszoba SET nev = :1, max_jatekos = :2, kviz_id = :3 WHERE id = :4`;
         try {
-            const result = await DbFunctions.dbInstance().execute(updateSql, [nev, maxJatekos, id]);
+            const result = await DbFunctions.dbInstance().execute(updateSql, [nev, maxJatekos, kvizId, id]);
             if (result.rowsAffected === 0) {
                 throw new Error("A játékszoba nem található a frissítéshez!");
             }
@@ -555,6 +572,18 @@ class DbFunctions {
         } catch (e) {
             console.error("Hiba a játékszoba frissítésekor:", e);
             throw e;
+        }
+    }
+
+    static async checkFelhSzobaEredmeny(userId, jatekszobaId, kvizId) {
+        if (!userId || !jatekszobaId || !kvizId) return false;
+        const sql = `SELECT COUNT(*) AS COUNT FROM Eredmeny WHERE FELHASZNALO_ID = :1 AND JATEKSZOBA_ID = :2 AND KVIZ_ID = :3`;
+        try {
+            const result = await DbFunctions.dbInstance().execute(sql, [userId, jatekszobaId, kvizId], { outFormat: oracledb.OUT_FORMAT_OBJECT });
+            return result.rows[0].COUNT > 0;
+        } catch (e) {
+            console.error("Hiba az eredmény ellenőrzésekor:", e);
+            return false;
         }
     }
 

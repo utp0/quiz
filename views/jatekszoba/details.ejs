@@ -1,0 +1,27 @@
+<h2>Játékszoba: <%= szoba.NEV %></h2>
+
+<% if (locals.message === 'submitted') { %>
+    <p style="color: green;">Kvíz sikeresen beküldve!</p>
+<% } %>
+<% if (locals.error === 'already_submitted') { %>
+    <p style="color: red;">Ezt a kvízt már kitöltötted ebben a szobában!</p>
+<% } else if (locals.error === 'submit_failed') { %>
+     <p style="color: red;">Hiba történt a kvíz beküldésekor.</p>
+<% } %>
+
+
+<p><strong>Kvíz:</strong> <%= szoba.KVIZ_NEV || 'N/A' %></p>
+<p><strong>Max játékos:</strong> <%= szoba.MAX_JATEKOS %></p>
+
+<hr>
+
+<% if (locals.alreadySubmitted) { %>
+    <p><strong>Ezt a kvízt már kitöltötted ebben a szobában.</strong></p>
+<% } else { %>
+    <a href="/kviz/start/<%= szoba.KVIZ_ID %>?room=<%= szoba.ID %>" class="btn">
+        Kvíz indítása ebben a szobában
+    </a>
+<% } %>
+
+<br><br>
+<a href="/jatekszoba">Vissza a játékszobák listájához</a>

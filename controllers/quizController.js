@@ -1,12 +1,13 @@
-const oracledb = require('oracledb'); 
+const oracledb = require('oracledb');
 const { getInstance } = require('../dbInstance');
 const DbFunctions = require('../dbFunctions');
 
 exports.startQuiz = async (req, res) => {
     const quizId = req.params.id;
+    const roomId = req.query.room || null;
 
     try {
-        const connection = getInstance(); 
+        const connection = getInstance();
 
         const result = await connection.execute(
             `SELECT 
@@ -35,9 +36,10 @@ exports.startQuiz = async (req, res) => {
 
         console.log("Strukturált kérdések:", questions);
 
-        res.render('kviz/start', { 
-            questions, 
-            quizId 
+        res.render('kviz/start', {
+            questions,
+            quizId,
+            roomId: roomId
         });
 
     } catch (err) {
@@ -83,61 +85,75 @@ function structureQuestions(rows) {
 }
 
 exports.submitQuiz = async (req, res) => {
-    const { quizId, questions } = req.body;
-    
-    const token = req.cookies.token; 
-    
+    const { quizId, questions, jatekszobaId } = req.body;
+
+    const token = req.cookies.token;
+
     const userId = await DbFunctions.verifyToken(token);
-    
+
     if (!userId) {
         return res.status(401).send('Nincs bejelentkezve, vagy a munkamenet lejárt.');
     }
-    
+
     try {
         const connection = getInstance();
-        
+
+        if (jatekszobaId) {
+            const alreadySubmitted = await DbFunctions.checkFelhSzobaEredmeny(userId, jatekszobaId, quizId);
+            if (alreadySubmitted) {
+                console.log(`userID ${userId} már beadta kvízID ${quizId} kvízt a ${jatekszobaId} id-jű szobába.`);
+                return res.redirect(`/jatekszoba/${jatekszobaId}?error=already_submitted`);
+            }
+        }
+
         let score = 0;
-        let totalQuestions = questions.length;
+        let totalQuestions = questions ? questions.length : 0;
         const userAnswers = [];
         let totalTime = 0;
         let correctAnswers = 0;
-        
+
         for (const question of questions) {
-            const selectedAnswerId = question.selectedAnswer;
-            const questionTime = question.answeredTime || 0; 
-            
+            const selectedAnswerId = question.selectedAnswer || null;
+            const questionTime = question.answeredTime || 0;
+
             totalTime += parseInt(questionTime);
-            
-            const result = await connection.execute(
-                `SELECT HELYES FROM VALASZ WHERE ID = :answerId`,
-                [selectedAnswerId],
-                { outFormat: oracledb.OUT_FORMAT_OBJECT }
-            );
-            
-            const isCorrect = result.rows[0].HELYES === 1;
-            
-            if (isCorrect) {
-                score++;
-                correctAnswers++;
+
+            let isCorrect = false;
+            if (selectedAnswerId != null) {
+                const result = await connection.execute(
+                    `SELECT HELYES FROM VALASZ WHERE ID = :answerId`,
+                    [selectedAnswerId],
+                    { outFormat: oracledb.OUT_FORMAT_OBJECT }
+                );
+
+                if (result.rows && result.rows.length > 0) {
+                    isCorrect = result.rows[0].HELYES === 1;
+
+                    if (isCorrect) {
+                        score++;
+                        correctAnswers++;
+                    }
+                }
             }
-            
+
             userAnswers.push({
                 questionId: question.id,
                 answerId: selectedAnswerId,
                 isCorrect
             });
         }
-        
+
         await connection.execute(
-            `INSERT INTO EREDMENY (FELHASZNALO_ID, KVIZ_ID, PONTSZAM, IDOBELYEG)
-             VALUES (:userId, :quizId, :score, CURRENT_TIMESTAMP)`,
+            `INSERT INTO EREDMENY (FELHASZNALO_ID, KVIZ_ID, PONTSZAM, IDOBELYEG, JATEKSZOBA_ID)
+             VALUES (:userId, :quizId, :score, CURRENT_TIMESTAMP, :jatekszobaId)`,
             {
                 userId: userId,
                 quizId: quizId,
-                score: score
+                score: score,
+                jatekszobaId: jatekszobaId || null
             }
         );
-        
+
         const statCheck = await connection.execute(
             `SELECT ID, ATLAGOS_KITOLTESI_IDO, HELYES_VALASZOK_ARANYA 
              FROM STATISZTIKA 
@@ -148,18 +164,18 @@ exports.submitQuiz = async (req, res) => {
             },
             { outFormat: oracledb.OUT_FORMAT_OBJECT }
         );
-        
+
         const avgTime = totalQuestions > 0 ? totalTime / totalQuestions : 0;
         const correctRatio = totalQuestions > 0 ? correctAnswers / totalQuestions : 0;
-        
+
         if (statCheck.rows.length > 0) {
             const existingStat = statCheck.rows[0];
             const oldAvgTime = parseFloat(existingStat.ÁTLAGOS_KITÖLTÉSI_IDŐ) || 0;
             const oldRatio = parseFloat(existingStat.HELYES_VÁLASZOK_ARÁNYA) || 0;
-            
+
             const newAvgTime = (oldAvgTime + avgTime) / 2;
             const newRatio = (oldRatio + correctRatio) / 2;
-            
+
             await connection.execute(
                 `UPDATE STATISZTIKA 
                  SET ATLAGOS_KITOLTESI_IDO = :avgTime, 
@@ -183,17 +199,17 @@ exports.submitQuiz = async (req, res) => {
                 }
             );
         }
-        
+
         const rankCheck = await connection.execute(
             `SELECT ID, OSSZPONTSZAM FROM RANGLISTA WHERE FELHASZNALO_ID = :userId`,
             { userId: userId },
             { outFormat: oracledb.OUT_FORMAT_OBJECT }
         );
-        
+
         if (rankCheck.rows.length > 0) {
             const currentScore = parseInt(rankCheck.rows[0].ÖSSZPONTSZÁM) || 0;
             const newTotalScore = currentScore + score;
-            
+
             await connection.execute(
                 `UPDATE RANGLISTA SET OSSZPONTSZAM = :newScore WHERE ID = :rankId`,
                 {
@@ -211,19 +227,23 @@ exports.submitQuiz = async (req, res) => {
                 }
             );
         }
-        
+
         await connection.commit();
-        
+
         const percentage = Math.round((score / totalQuestions) * 100);
-        
-        res.render('kviz/result', {
-            score,
-            totalQuestions,
-            percentage,
-            userAnswers,
-            quizId 
-        });
-        
+
+        if (jatekszobaId) {
+            res.redirect(`/jatekszoba/${jatekszobaId}?message=submitted`);
+        } else {
+            res.render('kviz/result', {
+                score,
+                totalQuestions,
+                percentage,
+                userAnswers,
+                quizId
+            });
+        }
+
     } catch (err) {
         console.error('Hiba a kvíz kiértékelésekor:', err);
         res.status(500).send('Szerverhiba történt.');
