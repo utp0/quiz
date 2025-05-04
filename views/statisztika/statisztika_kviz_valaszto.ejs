@@ -1,0 +1,11 @@
+<h2>Kvíz statisztikák</h2>
+
+<form>
+    <label for="kvizValaszto">Válassz egy kvízt:</label>
+    <select id="kvizValaszto" onchange="location.href='/statisztika/kviz/' + this.value">
+        <option disabled selected>-- Kérlek válassz --</option>
+        <% kvizek.forEach(kviz => { %>
+            <option value="<%= kviz.id %>"><%= kviz.nev %></option>
+        <% }) %>
+    </select>
+</form>

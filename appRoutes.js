@@ -190,6 +190,20 @@ app.get('/ranglista', statisticsController.showRankings);
 // Felhasználói statisztikák
 app.get('/statisztika/felhasznalo', statisticsController.showUserStatistics);
 
+app.get('/statisztika/kviz', async (req, res) => {
+    try {
+        const kvizek = await getAllKviz();
+        res.render("statisztika/statisztika_kviz_valaszto", {
+            title: "Kvíz statisztikák",
+            kvizek
+        });
+    } catch (error) {
+        console.error("Hiba a kvízek betöltésekor:", error);
+        res.status(500).send("Hiba történt a kvízek betöltésekor.");
+    }
+});
+
+
 // Kvíz statisztikák
 app.get('/statisztika/kviz/:id', statisticsController.showQuizStatistics);
 
