@@ -289,12 +289,20 @@ app.post("/tema/:id", isAdmin, async (req, res) => {
 
 app.get("/kviz", async (req, res) => {
     try {
-        const kvizek = await getAllKviz();
+        const kereses = req.query.kereses;
+        let kvizek;
+
+        if (kereses && kereses.trim() !== '') {
+            kvizek = await DbFunctions.searchKviz(kereses);
+        } else {
+            kvizek = await DbFunctions.getAllKviz();
+        }
 
         res.render("main", {
             page: "kviz/kvizlist",
             title: "Kvízek",
-            kvizek: kvizek
+            kvizek: kvizek,
+            kereses: kereses 
         });
     } catch (error) {
         console.error("Hiba a kvízek lekérdezésénél:", error);

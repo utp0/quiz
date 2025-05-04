@@ -1,11 +1,24 @@
 <h2>Kvízek</h2>
 
+<div class="kereso-container">
+    <form id="kereso-form" action="/kviz" method="GET">
+        <input type="text" id="kereso" name="kereses" placeholder="Keresés kvízek között..." 
+               value="<%= kereses || '' %>">
+        <button type="submit">Keresés</button>
+    </form>
+</div>
+
 <% if (kvizek.length === 0) { %>
-    <p>Jelenleg nincs elérhető kvíz.</p>
+    <% if (kereses) { %>
+        <p>Nincs találat a keresési feltételekre: "<%= kereses %>"</p>
+        <p><a href="/kviz">Összes kvíz mutatása</a></p>
+    <% } else { %>
+        <p>Jelenleg nincs elérhető kvíz.</p>
+    <% } %>
 <% } else { %>
-    <ul>
+    <ul id="kviz-lista">
         <% kvizek.forEach(kviz => { %>
-            <li>
+            <li class="kviz-elem">
                 <strong><a href="/kviz/<%= kviz.id %>"><%= kviz.nev %></a></strong><br>
                 <em><%= kviz.leiras %></em><br>
                 Létrehozva: <%= new Date(kviz.letrehozas_datuma).toLocaleDateString("hu-HU") %>
@@ -16,6 +29,42 @@
         <% }) %>
     </ul>
     
+    <% if (kereses) { %>
+        <p><a href="/kviz">Összes kvíz mutatása</a></p>
+    <% } %>
 <% } %>
 
 <a href="/kviz/new">+ Új kvíz létrehozása</a>
+
+<style>
+    .kereso-container {
+        margin-bottom: 20px;
+    }
+    
+    #kereso {
+        padding: 8px;
+        width: 300px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        margin-right: 5px;
+    }
+    
+    #kereso-form button {
+        padding: 8px 15px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    #kereso-form button:hover {
+        background-color: #45a049;
+    }
+    
+    .kviz-elem {
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+    }
+</style>

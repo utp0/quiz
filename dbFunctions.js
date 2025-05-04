@@ -285,6 +285,45 @@ class DbFunctions {
         }
     }
 
+    /**
+    * @param {string} searchTerm 
+    * @returns {Promise<Array>} 
+    */
+    static async searchKviz(searchTerm) {
+        const sql = `
+            SELECT
+                k.id,
+                k.nev,
+                k.leiras,
+                k.letrehozas_datuma,
+                f.FELHASZNALONEV AS keszito_nev
+            FROM Kviz k
+            LEFT JOIN FELHASZNALO f ON k.felhasznalo_id = f.ID
+            WHERE LOWER(k.nev) LIKE LOWER(:searchTerm)
+            OR LOWER(k.leiras) LIKE LOWER(:searchTerm)
+            ORDER BY k.letrehozas_datuma DESC
+        `;
+
+        try {
+            const params = {
+                searchTerm: `%${searchTerm}%`
+            };
+        
+            const result = await DbFunctions.dbInstance().execute(sql, params);
+
+            return result.rows.map(row => ({
+                id: row[0],
+                nev: row[1],
+                leiras: row[2],
+                letrehozas_datuma: row[3],
+                keszito_nev: row[4] || "Ismeretlen"
+            }));
+        } catch (e) {
+            console.error("Hiba a kvízek keresésénél:", e);
+            throw e;
+        }
+    }
+
     static async getAllKviz() {
         const sql = `
             SELECT
