@@ -609,14 +609,14 @@ app.post("/jatekszoba/new", requireLogin, isAdmin, async (req, res) => {
         await createJatekszoba(nev, felhasznalo_id, maxJatekos, kviz_id);
         res.redirect("/jatekszoba");
     } catch (err) {
-        console.error("Játékszoba létrehozása nem sikerült: ", err);
         const kvizek = await DbFunctions.getAllKviz();
         res.render("main", {
             page: "jatekszoba/new",
             title: "Új játékszoba létrehozása",
             kvizek: kvizek,
-            error: err.message || "Hiba történt a játékszoba létrehozásakor."
+            error: "Hiba történt a játékszoba létrehozásakor."
         });
+        console.error(err.code == 'ORA-02291' ? "Hiba játékszoba létrehozásakor: nem létező kvíz id." : err.message || "Hiba történt a játékszoba létrehozásakor.\n" + err);
     }
 });
 
