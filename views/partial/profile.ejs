@@ -20,6 +20,26 @@
         <input type="submit" value="Mentés" disabled></button>
     </form>
 
+    <h2>Statisztika</h2>
+    <table>
+        <thead>
+            <th>Kvíz</th>
+            <th>Kitöltési idő</th>
+            <th>Helyes válaszok aránya</th>
+        </thead>
+        <tbody>
+            <% let i = 0; locals.stats.forEach(element => {
+                %>
+            <tr>
+                <td><a href="/kviz/<%= element["KVIZ_ID"] %>"><%= quizes[i]["nev"] %></a></td>
+                <td><%= element["ATLAGOS_KITOLTESI_IDO"] %></td>
+                <td><%= element["HELYES_VALASZOK_ARANYA"] %></td>
+            </tr>
+            <%
+            i++;}); %>
+        </tbody>
+    </table>
+
     <script>
         // Később lehet lesz használva
         function validateForm() {

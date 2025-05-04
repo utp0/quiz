@@ -1,0 +1,23 @@
+<h2>Játékszoba szerkesztése</h2>
+
+<% if (locals.error) { %>
+<p style="color: red;"><%= locals.error %></p>
+<% } %>
+
+<form action="/jatekszoba/<%= szoba.ID %>" method="POST">
+    <input type="hidden" name="_method" value="PUT">
+
+    <label for="nev">Szoba neve:</label>
+    <input type="text" id="nev" name="nev" value="<%= szoba.NEV %>" required>
+    <br><br>
+
+    <label for="max_jatekos">Max játékosok száma:</label>
+    <input type="number" id="max_jatekos" name="max_jatekos" min="2" max="100" value="<%= szoba.MAX_JATEKOS %>" required>
+    <br><small>Legalább 2 fő szükséges a játékhoz.</small>
+    <br><br>
+
+    <div class="button-group">
+        <button type="submit" class="submit-btn">Mentés</button>
+        <a href="/jatekszoba" class="cancel-btn">Mégsem</a>
+    </div>
+</form>
