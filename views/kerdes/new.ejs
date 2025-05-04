@@ -3,10 +3,54 @@
 <form action="/kerdes" method="POST" class="tema-form">
     <div class="form-group">
         <label for="nev">Kérdés:</label>
-        <input type="text" id="nev" name="nev" required>
+        <input type="text" id="nev" name="nev" required value="<%= locals.formData ? formData.nev : '' %>">
         <% if (locals.error) { %>
             <p class="error-message"><%= locals.error %></p>
         <% } %>
+    </div>
+    
+    <h3>Válaszlehetőségek:</h3>
+    
+    <div class="valaszok-container">
+        <div class="valasz-group">
+            <label for="valasz1">1. Válasz:</label>
+            <input type="text" id="valasz1" name="valaszok[0][szoveg]" required 
+                   value="<%= locals.formData && formData.valaszok && formData.valaszok[0] ? formData.valaszok[0].szoveg : '' %>">
+            <label class="radio-label">
+                <input type="radio" name="helyes" value="0" required 
+                       <%= locals.formData && locals.formData.helyes == '0' ? 'checked' : '' %>> Helyes válasz
+            </label>
+        </div>
+        
+        <div class="valasz-group">
+            <label for="valasz2">2. Válasz:</label>
+            <input type="text" id="valasz2" name="valaszok[1][szoveg]" required
+                   value="<%= locals.formData && formData.valaszok && formData.valaszok[1] ? formData.valaszok[1].szoveg : '' %>">
+            <label class="radio-label">
+                <input type="radio" name="helyes" value="1"
+                       <%= locals.formData && locals.formData.helyes == '1' ? 'checked' : '' %>> Helyes válasz
+            </label>
+        </div>
+        
+        <div class="valasz-group">
+            <label for="valasz3">3. Válasz:</label>
+            <input type="text" id="valasz3" name="valaszok[2][szoveg]" required
+                   value="<%= locals.formData && formData.valaszok && formData.valaszok[2] ? formData.valaszok[2].szoveg : '' %>">
+            <label class="radio-label">
+                <input type="radio" name="helyes" value="2"
+                       <%= locals.formData && locals.formData.helyes == '2' ? 'checked' : '' %>> Helyes válasz
+            </label>
+        </div>
+        
+        <div class="valasz-group">
+            <label for="valasz4">4. Válasz:</label>
+            <input type="text" id="valasz4" name="valaszok[3][szoveg]" required
+                   value="<%= locals.formData && formData.valaszok && formData.valaszok[3] ? formData.valaszok[3].szoveg : '' %>">
+            <label class="radio-label">
+                <input type="radio" name="helyes" value="3"
+                       <%= locals.formData && locals.formData.helyes == '3' ? 'checked' : '' %>> Helyes válasz
+            </label>
+        </div>
     </div>
     
     <div class="button-group">
@@ -14,3 +58,40 @@
         <a href="/kerdes" class="cancel-btn">Mégsem</a>
     </div>
 </form>
+
+<style>
+    .valaszok-container {
+        margin: 20px 0;
+    }
+
+    .valasz-group {
+        margin-bottom: 15px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+
+    .valasz-group label {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .valasz-group input[type="text"] {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+    }
+
+    .radio-label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .error-message {
+        color: #d9534f;
+        font-weight: bold;
+        margin-top: 5px;
+    }
+</style>

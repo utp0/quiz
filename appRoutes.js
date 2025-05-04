@@ -9,7 +9,7 @@ const quizController = require('./controllers/quizController');
  */
 const app = new express.Router();
 
-const { registerUser, loginToken, verifyToken, getUserById, getAllTemakor, createTemakor, getTekorById, updateTemakor, deleteTemakor, deleteToken, getAllKerdes, createKerdes, getKerdesById, updateKerdes, deleteKerdes, getAllKviz, getKvizById, createKviz, updateKviz, deleteKviz, getAllJatekszoba, createJatekszoba, deleteJatekszoba, getJatekszobaById, updateJatekszoba, checkFelhSzobaEredmeny } = require("./dbFunctions");
+const { registerUser, loginToken, verifyToken, getUserById, getAllTemakor, createTemakor, getTekorById, updateTemakor, deleteTemakor, deleteToken, getAllKerdes, createKerdesWithValaszok, getKerdesById, updateKerdes, deleteKerdes, getAllKviz, getKvizById, createKviz, updateKviz, deleteKviz, getAllJatekszoba, createJatekszoba, deleteJatekszoba, getJatekszobaById, updateJatekszoba, checkFelhSzobaEredmeny } = require("./dbFunctions");
 const DbFunctions = require("./dbFunctions");
 
 app.use(async (req, res, next) => {
@@ -471,25 +471,48 @@ app.get("/kerdes/new", isAdmin, (req, res) => {
 
 
 app.post("/kerdes", isAdmin, async (req, res) => {
-
     const nev = req.body.nev?.trim();
+    const valaszok = req.body.valaszok || [];
+    const helyes = req.body.helyes;
 
     if (!nev || nev.length === 0) {
         return res.render("main", {
             page: "kerdes/new",
             title: "Új kérdés",
-            error: "A kérdés szövege nem lehet üres!"
+            error: "A kérdés szövege nem lehet üres!",
+            formData: { nev, valaszok } 
+        });
+    }
+
+    for (let i = 0; i < valaszok.length; i++) {
+        if (!valaszok[i].szoveg || valaszok[i].szoveg.trim().length === 0) {
+            return res.render("main", {
+                page: "kerdes/new",
+                title: "Új kérdés",
+                error: `A ${i+1}. válasz szövege nem lehet üres!`,
+                formData: { nev, valaszok }
+            });
+        }
+    }
+
+    if (helyes === undefined) {
+        return res.render("main", {
+            page: "kerdes/new",
+            title: "Új kérdés",
+            error: "Jelöljön meg egy helyes választ!",
+            formData: { nev, valaszok }
         });
     }
 
     try {
-        await createKerdes(nev);
+        await createKerdesWithValaszok(nev, valaszok, helyes);
         res.redirect("/kerdes");
     } catch (error) {
         res.render("main", {
-            page: "kerdes/list",
+            page: "kerdes/new", 
             title: "Új kérdés",
-            error: error.message || "Hiba történt a kérdés létrehozásakor."
+            error: error.message || "Hiba történt a kérdés létrehozásakor.",
+            formData: { nev, valaszok } 
         });
     }
 });

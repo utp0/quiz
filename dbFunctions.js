@@ -435,25 +435,58 @@ class DbFunctions {
         }
     }
 
-    static async createKerdes(szoveg) {
-        const checkSql = `SELECT COUNT(*) FROM KERDES WHERE SZOVEG = :1`;
+    static async createKerdesWithValaszok(szoveg, valaszok, helyesIndex) {
+        let connection;
         try {
-            const checkResult = await DbFunctions.dbInstance().execute(checkSql, [szoveg]);
+            connection = await DbFunctions.dbInstance();
+            
+            const checkSql = `SELECT COUNT(*) FROM KERDES WHERE SZOVEG = :1`;
+            const checkResult = await connection.execute(checkSql, [szoveg]);
             if (checkResult.rows[0][0] > 0) {
                 throw (new Error("Már létezik ez a kérdés!"));
             }
-
+    
             const idSql = `SELECT NVL(MAX(id), 0) + 1 FROM KERDES`;
-            const idResult = await DbFunctions.dbInstance().execute(idSql, []);
-            //const nextId = idResult.rows[0][0];
-
-            const insertSql = `INSERT INTO KERDES (szoveg, kviz_id) VALUES (:1, :2)`;
-            await DbFunctions.dbInstance().execute(insertSql, [szoveg, 99999]);
-            await DbFunctions.dbInstance().commit();
-
-            console.log(`Új kérdés létrehozva: ${szoveg}`);
+            const idResult = await connection.execute(idSql, []);
+            const nextId = idResult.rows[0][0];
+            console.log("Következő kérdés ID:", nextId);
+    
+            const insertSql = `INSERT INTO KERDES (id, szoveg, kviz_id) VALUES (:1, :2, :3)`;
+            await connection.execute(insertSql, [nextId, szoveg, 99999]);
+            
+            for (let i = 0; i < valaszok.length; i++) {
+                const helyesErtek = (parseInt(helyesIndex) === i) ? 1 : 0;
+                
+                try {
+                    const valaszSql = `INSERT INTO VALASZ (kerdes_id, szoveg, helyes) VALUES (:1, :2, :3)`;
+                    await connection.execute(valaszSql, [nextId, valaszok[i].szoveg, helyesErtek]);
+                    console.log(`${i+1}. válasz beszúrva, helyes: ${helyesErtek}`);
+                } catch (insertError) {
+                    if (insertError.errorNum === 20001) {
+                        throw new Error('Egy kérdéshez csak egy helyes válasz tartozhat!');
+                    } else if (insertError.errorNum === 20002) {
+                        throw new Error('Egy kérdéshez maximum 4 válasz tartozhat!');
+                    } else {
+                        console.error("Válasz beszúrási hiba:", insertError);
+                        throw insertError; 
+                    }
+                }
+            }
+            
+            await connection.commit();
+            
+            console.log(`Új kérdés és válaszok létrehozva: ${szoveg}, ID: ${nextId}`);
+            return nextId;
+            
         } catch (e) {
-            console.error("Hiba a kérdés létrehozásakor:", e);
+            if (connection) {
+                try {
+                    await connection.rollback();
+                } catch (rollbackErr) {
+                    console.error("Rollback hiba:", rollbackErr);
+                }
+            }
+            console.error("Hiba a kérdés és válaszok létrehozásakor:", e);
             throw e;
         }
     }

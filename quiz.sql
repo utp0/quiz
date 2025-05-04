@@ -43,6 +43,90 @@ DROP TABLE LOGINLOG CASCADE CONSTRAINTS;
 
 DROP TABLE FELHASZNALO_SZOBA_CSATLAKOZAS CASCADE CONSTRAINTS;
 
+CREATE OR REPLACE TRIGGER trg_ellenorzes_helyes_valasz
+BEFORE INSERT OR UPDATE ON valasz
+FOR EACH ROW
+DECLARE
+    v_helyes_szam NUMBER;
+    v_osszes_valasz NUMBER;
+BEGIN
+    IF :NEW.helyes = 1 THEN
+        SELECT COUNT(*)
+        INTO v_helyes_szam
+        FROM valasz
+        WHERE kerdes_id = :NEW.kerdes_id
+        AND helyes = 1
+        AND id != NVL(:NEW.id, 0); 
+        
+        IF v_helyes_szam > 0 THEN
+            RAISE_APPLICATION_ERROR(-20001, 'Egy kérdéshez csak egy helyes válasz tartozhat!');
+        END IF;
+    END IF;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trg_max_negy_valasz
+BEFORE INSERT ON valasz
+FOR EACH ROW
+DECLARE
+    v_valasz_szam NUMBER;
+BEGIN
+    SELECT COUNT(*)
+    INTO v_valasz_szam
+    FROM valasz
+    WHERE kerdes_id = :NEW.kerdes_id;
+    
+    IF v_valasz_szam >= 4 THEN
+        RAISE_APPLICATION_ERROR(-20002, 'Egy kérdéshez maximum 4 válasz tartozhat!');
+    END IF;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trg_kerdes_torlese
+BEFORE DELETE ON kerdes
+FOR EACH ROW
+BEGIN
+    DELETE FROM valasz WHERE kerdes_id = :OLD.id;
+END;
+/
+
+CREATE TABLE valasz_naplo (
+    naplo_id NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    valasz_id NUMBER,
+    kerdes_id NUMBER,
+    regi_szoveg VARCHAR2(500),
+    uj_szoveg VARCHAR2(500),
+    regi_helyes NUMBER(1),
+    uj_helyes NUMBER(1),
+    modositas_ideje TIMESTAMP,
+    modosito_felhasznalo VARCHAR2(100)
+);
+
+CREATE OR REPLACE TRIGGER trg_valasz_modositas_naplo
+AFTER UPDATE ON valasz
+FOR EACH ROW
+BEGIN
+    INSERT INTO valasz_naplo (
+        valasz_id,
+        kerdes_id,
+        regi_szoveg,
+        uj_szoveg,
+        regi_helyes,
+        uj_helyes,
+        modositas_ideje,
+        modosito_felhasznalo
+    ) VALUES (
+        :OLD.id,
+        :OLD.kerdes_id,
+        :OLD.szoveg,
+        :NEW.szoveg,
+        :OLD.helyes,
+        :NEW.helyes,
+        SYSTIMESTAMP,
+        SYS_CONTEXT('USERENV', 'SESSION_USER')
+    );
+END;
+
 
 --tábladefiníciók
 
