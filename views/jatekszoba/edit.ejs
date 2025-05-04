@@ -16,6 +16,19 @@
     <br><small>Legalább 2 fő szükséges a játékhoz.</small>
     <br><br>
 
+    <label for="kviz_id">Válassz kvízt:</label>
+    <select id="kviz_id" name="kviz_id" required>
+        <option value="">-- Kvíz választása --</option>
+        <% if (locals.kvizek && locals.kvizek.length > 0) { %>
+        <% locals.kvizek.forEach(kviz => { %>
+        <option value="<%= kviz.id %>"><%= kviz.nev %></option>
+        <% }) %>
+        <% } else { %>
+        <option value="" disabled>Nincsenek elérhető kvízek</option>
+        <% } %>
+    </select>
+    <br><br>
+
     <div class="button-group">
         <button type="submit" class="submit-btn">Mentés</button>
         <a href="/jatekszoba" class="cancel-btn">Mégsem</a>

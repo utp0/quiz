@@ -9,7 +9,7 @@ const quizController = require('./controllers/quizController');
  */
 const app = new express.Router();
 
-const { registerUser, loginToken, verifyToken, getUserById, getAllTemakor, createTemakor, getTekorById, updateTemakor, deleteTemakor, deleteToken, getAllKerdes, createKerdes, getKerdesById, updateKerdes, deleteKerdes, getAllKviz, getKvizById, createKviz, updateKviz, deleteKviz, getAllJatekszoba, createJatekszoba, deleteJatekszoba, getJatekszobaById, updateJatekszoba } = require("./dbFunctions");
+const { registerUser, loginToken, verifyToken, getUserById, getAllTemakor, createTemakor, getTekorById, updateTemakor, deleteTemakor, deleteToken, getAllKerdes, createKerdes, getKerdesById, updateKerdes, deleteKerdes, getAllKviz, getKvizById, createKviz, updateKviz, deleteKviz, getAllJatekszoba, createJatekszoba, deleteJatekszoba, getJatekszobaById, updateJatekszoba, checkFelhSzobaEredmeny } = require("./dbFunctions");
 const DbFunctions = require("./dbFunctions");
 
 app.use(async (req, res, next) => {
@@ -28,6 +28,12 @@ app.use(async (req, res, next) => {
     next()
 })
 
+function requireLogin(req, res, next) {
+    if (!res.locals.currentUser) {
+        return res.redirect("/login");
+    }
+    next();
+}
 
 function isAdmin(req, res, next) {
     if (typeof res.locals.currentUser !== "undefined" && res.locals.currentUser && res.locals.currentUser["JOGOSULTSAG"] === "admin") {
@@ -132,9 +138,9 @@ app.get("/profile", async (req, res) => {
     );
 });
 
-app.get("/kviz/start/:id", quizController.startQuiz);
+app.get("/kviz/start/:id", requireLogin, quizController.startQuiz);
 
-app.post('/kviz/submit', quizController.submitQuiz);
+app.post('/kviz/submit', requireLogin, quizController.submitQuiz);
 
 app.get("/tema", async (req, res) => {
     try {
@@ -571,24 +577,34 @@ app.get("/jatekszoba", async (req, res) => {
     }
 });
 
-app.get("/jatekszoba/new", (req, res) => {
+app.get("/jatekszoba/new", requireLogin, isAdmin, async (req, res) => {
     if (!res.locals.currentUser) {
         return res.redirect("/login");
     }
 
-    res.render("main", {
-        page: "jatekszoba/new",
-        title: "Új játékszoba létrehozása"
-    });
+    let kvizek;
+    try {
+        kvizek = await DbFunctions.getAllKviz();
+    } catch (err) {
+        console.error("Kvízek lekérése nem sikerült játékszoba létrehozásakor!\n", err);
+        kvizek = null;
+    } finally {
+        res.render("main", {
+            page: "jatekszoba/new",
+            title: "Új játékszoba",
+            kvizek: kvizek
+        });
+    }
 });
 
-app.post("/jatekszoba/new", async (req, res) => {
+app.post("/jatekszoba/new", requireLogin, isAdmin, async (req, res) => {
     if (!res.locals.currentUser) {
         return res.redirect("/login");
     }
 
     const nev = req.body.nev?.trim();
     const maxJatekos = parseInt(req.body.max_jatekos);
+    const kviz_id = req.body.kviz_id || null;
     const felhasznalo_id = res.locals.currentUser["ID"];
 
     if (!felhasznalo_id) {
@@ -604,19 +620,46 @@ app.post("/jatekszoba/new", async (req, res) => {
     }
 
     try {
-        await createJatekszoba(nev, felhasznalo_id, maxJatekos);
+        await createJatekszoba(nev, felhasznalo_id, maxJatekos, kviz_id);
         res.redirect("/jatekszoba");
     } catch (err) {
-        console.error("Játékszoba létrehozása nem sikerült: ", err);
+        const kvizek = await DbFunctions.getAllKviz();
         res.render("main", {
             page: "jatekszoba/new",
             title: "Új játékszoba létrehozása",
-            error: err.message || "Hiba történt a játékszoba létrehozásakor."
+            kvizek: kvizek,
+            error: "Hiba történt a játékszoba létrehozásakor."
         });
+        console.error(err.code == 'ORA-02291' ? "Hiba játékszoba létrehozásakor: nem létező kvíz id." : err.message || "Hiba történt a játékszoba létrehozásakor.\n" + err);
     }
 });
 
-app.get("/jatekszoba/:id/edit", async (req, res) => {
+app.get("/jatekszoba/:id", requireLogin, async (req, res) => {
+    const jatekszobaId = parseInt(req.params.id);
+    const userId = res.locals.currentUser.ID;
+    if (isNaN(jatekszobaId)) return res.status(400).send("Érvénytelen ID");
+
+    try {
+        const szoba = await DbFunctions.getJatekszobaById(jatekszobaId);
+        if (!szoba) return res.status(404).send("Szoba nem található.");
+
+        const alreadySubmitted = await DbFunctions.checkFelhSzobaEredmeny(userId, szoba.ID, szoba.KVIZ_ID);
+
+        res.render("main", {
+            page: "jatekszoba/details",
+            title: `Játékszoba: ${szoba.NEV}`,
+            szoba: szoba,
+            alreadySubmitted: alreadySubmitted,
+            message: req.query.message,
+            error: req.query.error
+        });
+    } catch (err) {
+        console.error("Hiba a játékszoba oldal betöltésekor:", err);
+        res.status(500).send("Hiba történt.");
+    }
+});
+
+app.get("/jatekszoba/:id/edit", requireLogin, isAdmin, async (req, res) => {
     if (!res.locals.currentUser) {
         return res.redirect("/login");
     }
@@ -639,10 +682,12 @@ app.get("/jatekszoba/:id/edit", async (req, res) => {
             return res.status(403).send("Nincs jogosultságod ennek a játékszobának a szerkesztéséhez.");
         }
 
+        const kvizek = await DbFunctions.getAllKviz();
         res.render("main", {
             page: "jatekszoba/edit",
             title: "Játékszoba szerkesztése",
-            szoba: szoba
+            szoba: szoba,
+            kvizek: kvizek
         });
 
     } catch (err) {
@@ -651,7 +696,7 @@ app.get("/jatekszoba/:id/edit", async (req, res) => {
     }
 });
 
-app.delete("/jatekszoba/:id", async (req, res) => {  // TODO: ?
+/*app.delete("/jatekszoba/:id", async (req, res) => {  // TODO: ?
     const id = parseInt(req.params.id);
     if (isNaN(id)) {
         return res.status(400).send("Érvénytelen játékszoba azonosító");
@@ -664,70 +709,38 @@ app.delete("/jatekszoba/:id", async (req, res) => {  // TODO: ?
         console.error("Hiba a játékszoba törlésekor:", err);
         res.status(500).send("Hiba történt a játékszoba törlésekor: " + (err.message || "Ismeretlen hiba"));
     }
-});
+});*/
 
-app.post("/jatekszoba/:id", async (req, res) => {
+app.post("/jatekszoba/:id", requireLogin, isAdmin, async (req, res) => {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).send("Érvénytelen ID");
+
     if (req.body._method === "PUT") {
-        if (!res.locals.currentUser) {
-            return res.redirect("/login");
-        }
-        const id = parseInt(req.params.id);
-        const nev = req.body.nev?.trim();
-        const maxJatekos = parseInt(req.body.max_jatekos);
-
-        if (isNaN(id)) return res.status(400).send("Érvénytelen játékszoba azonosító");
-        if (!nev || nev.length === 0 || isNaN(maxJatekos) || maxJatekos < 2) {
-            const szoba = await getJatekszobaById(id);
+        const { nev, max_jatekos, kviz_id } = req.body;
+        try {
+            await DbFunctions.updateJatekszoba(id, nev?.trim(), parseInt(max_jatekos), kviz_id);
+            return res.redirect("/jatekszoba");
+        } catch (err) {
+            const szoba = await DbFunctions.getJatekszobaById(id);
+            const kvizek = await DbFunctions.getAllKviz();
             return res.render("main", {
                 page: "jatekszoba/edit",
                 title: "Játékszoba szerkesztése",
-                szoba: szoba || { ID: id, NEV: nev, MAX_JATEKOS: maxJatekos },
-                error: "Hibás név vagy játékos szám! Minimum 2 fő szükséges."
+                szoba: szoba || { ID: id, NEV: nev, MAX_JATEKOS: max_jatekos, KVIZ_ID: kviz_id }, // Pass back current/attempted data
+                kvizek: kvizek,
+                error: err.message || "Hiba a frissítéskor."
             });
         }
-
+    } else if (req.body._method === "DELETE") {
         try {
-            const szoba = await getJatekszobaById(id);
-            if (!szoba) return res.status(404).send("A játékszoba nem található.");
-            const isAdmin = res.locals.currentUser["JOGOSULTSAG"] === "admin";
-            const isCreator = res.locals.currentUser["ID"] === szoba.FELHASZNALO_ID;
-            if (!isAdmin && !isCreator) return res.status(403).send("Nincs jogosultságod ennek a játékszobának a szerkesztéséhez.");
-
-            await updateJatekszoba(id, nev, maxJatekos);
-            res.redirect("/jatekszoba");
-        } catch (err) {
-            console.error("Hiba a játékszoba frissítésekor:", err);
-            const szoba = await getJatekszobaById(id);
-            res.render("main", {
-                page: "jatekszoba/edit",
-                title: "Játékszoba szerkesztése",
-                szoba: szoba || { ID: id, NEV: nev, MAX_JATEKOS: maxJatekos },
-                error: err.message || "Hiba történt a játékszoba frissítésekor."
-            });
-        }
-        return;
-    }
-
-    if (req.body._method === "DELETE") {
-        const id = parseInt(req.params.id);
-        if (isNaN(id)) {
-            return res.status(400).send("Érvénytelen játékszoba azonosító");
-        }
-
-        try {
-            const szoba = await getJatekszobaById(id);
-            if (!szoba) return res.status(404).send("A játékszoba nem található.");
-            const isAdmin = res.locals.currentUser["JOGOSULTSAG"] === "admin";
-            const isCreator = res.locals.currentUser["ID"] === szoba.FELHASZNALO_ID;
-            if (!isAdmin && !isCreator) return res.status(403).send("Nincs jogosultságod ennek a játékszobának a törléséhez.");
-            await deleteJatekszoba(id);
-            res.redirect("/jatekszoba");
+            await DbFunctions.deleteJatekszoba(id);
+            return res.redirect("/jatekszoba");
         } catch (err) {
             console.error("Hiba a játékszoba törlésekor:", err);
-            res.status(500).send("Hiba történt a játékszoba törlésekor: " + (err.message || "Ismeretlen hiba"));
+            res.status(500).send("Hiba a törléskor.");
         }
     } else {
-        res.status(400).send("Ismeretlen metódus");
+        res.status(400).send("Ismeretlen metódus.");
     }
 });
 
