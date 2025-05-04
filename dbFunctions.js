@@ -26,6 +26,45 @@ class DbFunctions {
         }
     }
 
+    static async swapPerms(userId) {
+        let user = null;
+        user = await DbFunctions.getUserById(userId);
+        if(user == null) {
+            return false;
+        }
+        let newperm = "felhasznalo";
+        if(user["JOGOSULTSAG"] == "felhasznalo") {
+            newperm = "admin";
+        }
+        const sql = `
+            UPDATE FELHASZNALO SET JOGOSULTSAG = :jog WHERE ID = :id
+        `;
+        try {
+            await DbFunctions.dbInstance().execute(sql, {
+                jog: newperm,
+                id: userId
+            });
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    static async deleteUser(userId) {
+        const sql = `
+            DELETE FROM FELHASZNALO WHERE ID = :1
+        `;
+        try {
+            const result = await DbFunctions.dbInstance().execute(sql, [userId],
+                { outFormat: oracledb.OUT_FORMAT_OBJECT }
+            );
+            return true;
+        } catch (e) {
+            console.error(`Nem sikerült a felhasználó törlése (${userId})\n`, e);
+            throw e;
+        }
+    }
+
     /**
      * 
      * @param {string} username 
@@ -187,6 +226,32 @@ class DbFunctions {
             return null;  // vagy nincs, vagy több van (unique miatt nem lehet)
         }
         return ret.rows[0];
+    }
+
+    static async getAllUsers() {
+        const sql = `
+        SELECT
+            felhasznalo.id ID,
+            felhasznalo.felhasznalonev FELHASZNALONEV,
+            felhasznalo.email EMAIL,
+            felhasznalo.szuletesi_ev SZULETESI_EV,
+            felhasznalo.jogosultsag JOGOSULTSAG
+        FROM
+            felhasznalo
+        ORDER BY
+            felhasznalo.id DESC`;
+        let ret = [];
+        try {
+            ret = await DbFunctions.dbInstance().execute(sql, [], {
+                outFormat: oracledb.OUT_FORMAT_OBJECT
+            });
+        } catch (e) {
+            console.error(`Hiba az összes felhasználó lekérése közben.\n`, e);
+        }
+        if (!ret.rows || ret.rows.length == 0) {
+            return null;
+        }
+        return ret.rows;
     }
 
     static async getAllTemakor() {
