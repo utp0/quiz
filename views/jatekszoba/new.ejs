@@ -1,5 +1,9 @@
 <h2>Új játékszoba létrehozása</h2>
 
+<% if (locals.error) { %>
+<p style="color: red;"><%= locals.error %></p>
+<% } %>
+
 <form action="/jatekszoba/new" method="POST">
     <label for="nev">Szoba neve:</label>
     <input type="text" id="nev" name="nev" required>
@@ -8,6 +12,19 @@
     <label for="max_jatekos">Max játékosok száma:</label>
     <input type="number" id="max_jatekos" name="max_jatekos" min="2" max="100" required>
     <br><small>Legalább 2 fő szükséges a játékhoz.</small>
+    <br><br>
+
+    <label for="kviz_id">Válassz kvízt:</label>
+    <select id="kviz_id" name="kviz_id" required>
+        <option value="">-- Kvíz választása --</option>
+        <% if (locals.kvizek && locals.kvizek.length > 0) { %>
+        <% locals.kvizek.forEach(kviz => { %>
+        <option value="<%= kviz.id %>"><%= kviz.nev %></option>
+        <% }) %>
+        <% } else { %>
+        <option value="" disabled>Nincsenek elérhető kvízek</option>
+        <% } %>
+    </select>
     <br><br>
 
     <button type="submit">Létrehozás</button>

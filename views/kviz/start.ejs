@@ -13,6 +13,9 @@
     
     <form id="quizForm" action="/kviz/submit" method="POST">
         <input type="hidden" name="quizId" value="<%= quizId %>">
+        <% if (locals.roomId) { %>
+            <input type="hidden" name="jatekszobaId" value="<%= locals.roomId %>">
+        <% } %>
         
         <div id="question-container">
             <% for(let i = 0; i < questions.length; i++) { %>

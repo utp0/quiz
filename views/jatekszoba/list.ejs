@@ -6,6 +6,7 @@
     <thead>
         <tr>
             <th>Név</th>
+            <th>Kvíz</th>
             <th>Max. játékos</th>
             <th>Művelet</th>
         </tr>
@@ -14,9 +15,11 @@
         <% if (jatekszobak && jatekszobak.length > 0) { %>
         <% jatekszobak.forEach(szoba => { %>
         <tr>
-            <td><%= szoba.NEV %></td>
+            <td><a href="/jatekszoba/<%=szoba.ID%>"><%= szoba.NEV %></a></td>
+            <td><%= szoba.KVIZ_NEV || "" %></td>
             <td><%= szoba.MAX_JATEKOS %></td>
             <td>
+                <a href="/jatekszoba/<%= szoba.ID %>" style="margin-right: 5px;">Részletek/Indítás</a>
                 <% if(locals.currentUser && (locals.currentUser["JOGOSULTSAG"] == "admin" || locals.currentUser["ID"] == szoba.FELHASZNALO_ID)) { %>
                 <a href="/jatekszoba/<%= szoba.ID %>/edit" style="margin-right: 5px;">Szerkesztés</a>
                 <form action="/jatekszoba/<%= szoba.ID %>" method="POST">
