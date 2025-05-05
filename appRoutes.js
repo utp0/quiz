@@ -752,6 +752,42 @@ app.post("/jatekszoba/:id", requireLogin, isAdmin, async (req, res) => {
     }
 });
 
+app.get("/admin_userlist", requireLogin, isAdmin, async (req, res) => {
+    const userrows = await DbFunctions.getAllUsers();
+    return res.render("main", {
+        page: "partial/admin_userlist",
+        title: "Felhasználók kezelése",
+        users: userrows ?? null
+    });
+});
+
+app.post("/togglePerm", requireLogin, isAdmin, async (req, res) => {
+    const userId = req.body["userId"] ?? null;
+    if (!userId) {
+        return res.status(400).send("Érvénytelen felhaszáló id: " + req.body["userId"].toString());
+    }
+    try {
+        const result = await DbFunctions.swapPerms(userId);
+        return res.redirect("/admin_userlist");
+    } catch (error) {
+        console.error(`Felhasználó engedélyének módosítása sikertelen. id: ${userId}\n`, error);
+        return res.status(500).send("Felhasználó engedélyének módosítása sikertelen.");
+    }
+});
+
+app.post("/deleteUser", requireLogin, isAdmin, async (req, res) => {
+    const userId = req.body["userId"] ?? null;
+    if (!userId) {
+        return res.status(400).send("Érvénytelen felhaszáló id: " + req.body["userId"].toString());
+    }
+    try {
+        const result = await DbFunctions.deleteUser(userId);
+        return res.redirect("/admin_userlist");
+    } catch (error) {
+        console.error(`Felhasználó törlése sikertelen. id: ${userId}\n`, error);
+        return res.status(500).send("Felhasználó törlése sikertelen.");
+    }
+});
 
 
 

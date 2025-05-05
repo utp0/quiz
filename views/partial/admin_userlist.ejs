@@ -1,0 +1,41 @@
+<body>
+    <% if(!locals.users){
+        %>
+    <p style="color: rgb(255, 95, 95);">Felhasználólista lekérése sikertelen.</p>
+    <%
+    } else { %>
+    <table>
+        <thead>
+            <th>id</th>
+            <th>Felhasználónév</th>
+            <th>Email cím</th>
+            <th>Születési év</th>
+            <th>Jogosultság</th>
+            <th>Műveletek</th>
+        </thead>
+        <tbody>
+            <% let i = 0; locals.users.forEach(element => {
+                %>
+            <tr>
+                <td><%= element["ID"] %></td>
+                <td><%= element["FELHASZNALONEV"] %></td>
+                <td><%= element["EMAIL"] %></td>
+                <td><%= element["SZULETESI_EV"] %></td>
+                <td><%= element["JOGOSULTSAG"] %></td>
+                <td>
+                    <form style="margin: 1px; display: inline;" method="POST" action="/togglePerm">
+                        <input type="hidden" name="userId" value="<%=element["ID"]%>">
+                        <input type="submit" value="átcsinálás">
+                    </form>
+                    <form style="margin: 1px; display: inline;" method="POST" action="/deleteUser">
+                        <input type="hidden" name="userId" value="<%=element["ID"]%>">
+                        <input type="submit" value="elcsinálás">
+                    </form>
+                </td>
+            </tr>
+            <% i++;
+        }); %>
+        </tbody>
+    </table>
+    <% } %>
+</body>
