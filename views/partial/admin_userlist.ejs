@@ -18,18 +18,18 @@
                 %>
             <tr>
                 <td><%= element["ID"] %></td>
-                <td><%= element["FELHASZNALONEV"] %></td>
+                <td><a href="/profile?id=<%=element["ID"]%>"><%= element["FELHASZNALONEV"] %></a></td>
                 <td><%= element["EMAIL"] %></td>
                 <td><%= element["SZULETESI_EV"] %></td>
                 <td><%= element["JOGOSULTSAG"] %></td>
                 <td>
                     <form style="margin: 1px; display: inline;" method="POST" action="/togglePerm">
                         <input type="hidden" name="userId" value="<%=element["ID"]%>">
-                        <input type="submit" value="átcsinálás">
+                        <input type="submit" value="Szerep módosítása">
                     </form>
                     <form style="margin: 1px; display: inline;" method="POST" action="/deleteUser">
                         <input type="hidden" name="userId" value="<%=element["ID"]%>">
-                        <input type="submit" value="elcsinálás">
+                        <input type="submit" value="Törlés">
                     </form>
                 </td>
             </tr>

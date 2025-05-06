@@ -115,7 +115,17 @@ app.post("/login", async (req, res) => {
 });
 
 app.get("/profile", async (req, res) => {
-    const stats = await DbFunctions.getStatsForUser(res.locals.currentUser["ID"]);
+
+    if (req.query["id"]) {
+
+    } else {
+        const stats = await DbFunctions.getStatsForUser(res.locals.currentUser["ID"]);
+    }
+    const profileId = parseInt(req.query["id"]);
+    const user = profileId !== NaN && profileId.toString().trim() !== res.locals.currentUser["ID"].toString().trim() ? await getUserById(profileId) : null;
+    const stats = profileId !== NaN ?
+        await DbFunctions.getStatsForUser(profileId) :
+        await DbFunctions.getStatsForUser(res.locals.currentUser["ID"]);
     let quizes = [];
 
     for (const element of stats) {
@@ -134,6 +144,7 @@ app.get("/profile", async (req, res) => {
             title: "Profil",
             stats: stats,
             quizes: quizes,
+            user: user
         }
     );
 });
@@ -179,7 +190,7 @@ app.post("/profile", async (req, res) => {
                 quizes: quizes,
             }
         );
-        
+
     } catch (error) {
         console.error("Profil frissítés hiba:", error);
         const stats = await DbFunctions.getStatsForUser(res.locals.currentUser["ID"]);
@@ -376,7 +387,7 @@ app.get("/kviz", async (req, res) => {
             page: "kviz/kvizlist",
             title: "Kvízek",
             kvizek: kvizek,
-            kereses: kereses 
+            kereses: kereses
         });
     } catch (error) {
         console.error("Hiba a kvízek lekérdezésénél:", error);
@@ -552,7 +563,7 @@ app.post("/kerdes", isAdmin, async (req, res) => {
 
     try {
         await createKerdes(nev);
-        
+
         const kerdesek = await getAllKerdes();
 
         res.render("main", {

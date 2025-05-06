@@ -1,3 +1,12 @@
+<% 
+let temp = null;
+let otherPerson = false;
+if(locals.user) {
+    temp = locals.currentUser;
+    locals.currentUser = locals.user;
+    otherPerson = true;
+} %>
+
 <body>
     <h1>Profil</h1>
 
@@ -17,15 +26,17 @@
         <label for="birthYear">Születési év:</label><br>
         <input type="number" id="birthYear" name="birthYear" min="1900" max="2025" value="<%= locals.currentUser["SZULETESI_EV"] %>" disabled><br><br>
 
+        <% if(!otherPerson) { %>
         <button type="button" onclick="enableEditing()">Szerkesztés</button>
         <input type="submit" id="saveButton" value="Mentés" disabled>
+        <% } %>
     </form>
     <% if (typeof successMessage !== "undefined" && successMessage) { %>
-        <div class="alert alert-success" style="color: green; margin-top: 10px;">
-            <%= successMessage %>
-        </div>
+    <div class="alert alert-success" style="color: green; margin-top: 10px;">
+        <%= successMessage %>
+    </div>
     <% } %>
-    
+
 
     <h2>Statisztika</h2>
     <table>
@@ -53,19 +64,22 @@
             fields.forEach(field => field.disabled = false);
             document.getElementById('saveButton').disabled = false;
         }
-    
+
         function validateForm() {
             const pw = document.getElementById('password').value;
             const confirmPw = document.getElementById('confirmPassword').value;
-    
+
             if (pw !== confirmPw) {
                 alert("A két jelszó nem egyezik meg!");
                 return false;
             }
-    
+
             return true;
         }
-
-
-    </script>    
+    </script>
 </body>
+
+
+<% if(locals.user) {
+    locals.currentUser = temp;
+} %>
