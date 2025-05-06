@@ -46,7 +46,8 @@ if(locals.user) {
             <th>Helyes válaszok aránya</th>
         </thead>
         <tbody>
-            <% let i = 0; locals.stats.forEach(element => {
+            <% if(stats) {
+            let i = 0; locals.stats.forEach(element => {
                 %>
             <tr>
                 <td><a href="/kviz/<%= element["KVIZ_ID"] %>"><%= quizes[i]["nev"] %></a></td>
@@ -54,7 +55,8 @@ if(locals.user) {
                 <td><%= element["HELYES_VALASZOK_ARANYA"] %></td>
             </tr>
             <%
-            i++;}); %>
+            i++;});
+        }; %>
         </tbody>
     </table>
 

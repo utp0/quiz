@@ -122,20 +122,20 @@ app.get("/profile", async (req, res) => {
         const stats = await DbFunctions.getStatsForUser(res.locals.currentUser["ID"]);
     }
     const profileId = parseInt(req.query["id"]);
-    const user = profileId !== NaN && profileId.toString().trim() !== res.locals.currentUser["ID"].toString().trim() ? await getUserById(profileId) : null;
-    const stats = profileId !== NaN ?
+    const user = profileId.toString() !== "NaN" && profileId.toString().trim() !== res.locals.currentUser["ID"].toString().trim() ? await getUserById(profileId) : null;
+    const stats = profileId.toString() !== "NaN" ?
         await DbFunctions.getStatsForUser(profileId) :
         await DbFunctions.getStatsForUser(res.locals.currentUser["ID"]);
     let quizes = [];
 
-    for (const element of stats) {
-        try {
+    try {
+        for (const element of stats) {
             const quiz = await getKvizById(element["KVIZ_ID"]);
             quizes.push(quiz);
-        } catch (error) {
-            console.error(`Kvíz lekérése sikertelen! id: ${element["KVIZ_ID"]}`);
-            quizes.push({});
         }
+    } catch (error) {
+        console.error(`Kvíz lekérése sikertelen!`);
+        quizes.push({});
     }
 
     return res.render("main",

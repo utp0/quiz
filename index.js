@@ -35,7 +35,7 @@ const PORT = process.env.PORT || 3000;  // ezt használjuk böngészőben
 
 app.set("view engine", "ejs");
 app.set("view options", {
-    rmWhitespace: true,
+    rmWhitespace: false,
     async: false,
 });
 app.set("views", path.join(__dirname, "views"));
