@@ -766,12 +766,12 @@ class DbFunctions {
             s.ATLAGOS_KITOLTESI_IDO,
             s.HELYES_VALASZOK_ARANYA
         FROM
-            "C##FELHASZNALO"."STATISZTIKA" s
+            STATISZTIKA s
         INNER JOIN (
             SELECT
                 MAX(ID) AS max_id
             FROM
-                "C##FELHASZNALO"."STATISZTIKA"
+                STATISZTIKA
             WHERE
                 FELHASZNALO_ID = :1
             GROUP BY
