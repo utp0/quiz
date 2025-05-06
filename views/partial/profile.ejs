@@ -1,24 +1,31 @@
 <body>
     <h1>Profil</h1>
 
-    <form onsubmit="return validateForm()">
+    <form method="POST" action="/profile" onsubmit="return validateForm()">
         <label for="username">Felhasználónév:</label><br>
-        <input type="text" id="username" name="username" value="<%= locals.currentUser["FELHASZNALONEV"] %>" required disabled><br><br>
+        <input type="text" id="username" name="username" value="<%= locals.currentUser["FELHASZNALONEV"] %>" disabled><br><br>
 
         <label for="email">E-mail:</label><br>
-        <input type="email" id="email" name="email" value="<%= locals.currentUser["EMAIL"] %>" required disabled><br><br>
+        <input type="email" id="email" name="email" value="<%= locals.currentUser["EMAIL"] %>" disabled><br><br>
 
         <label for="password">Jelszó:</label><br>
-        <input type="password" id="password" name="password" required disabled><br><br>
+        <input type="password" id="password" name="password" disabled><br><br>
 
         <label for="confirmPassword">Jelszó megerősítése:</label><br>
-        <input type="password" id="confirmPassword" name="confirmPassword" required disabled><br><br>
+        <input type="password" id="confirmPassword" name="confirmPassword" disabled><br><br>
 
         <label for="birthYear">Születési év:</label><br>
-        <input type="number" id="birthYear" name="birthYear" min="1900" max="2025" value="<%= locals.currentUser["SZULETESI_EV"] %>" required disabled><br><br>
+        <input type="number" id="birthYear" name="birthYear" min="1900" max="2025" value="<%= locals.currentUser["SZULETESI_EV"] %>" disabled><br><br>
 
-        <input type="submit" value="Mentés" disabled></button>
+        <button type="button" onclick="enableEditing()">Szerkesztés</button>
+        <input type="submit" id="saveButton" value="Mentés" disabled>
     </form>
+    <% if (typeof successMessage !== "undefined" && successMessage) { %>
+        <div class="alert alert-success" style="color: green; margin-top: 10px;">
+            <%= successMessage %>
+        </div>
+    <% } %>
+    
 
     <h2>Statisztika</h2>
     <table>
@@ -41,16 +48,24 @@
     </table>
 
     <script>
-        // Később lehet lesz használva
+        function enableEditing() {
+            const fields = document.querySelectorAll('#username, #email, #password, #confirmPassword, #birthYear');
+            fields.forEach(field => field.disabled = false);
+            document.getElementById('saveButton').disabled = false;
+        }
+    
         function validateForm() {
             const pw = document.getElementById('password').value;
             const confirmPw = document.getElementById('confirmPassword').value;
-
+    
             if (pw !== confirmPw) {
                 alert("A két jelszó nem egyezik meg!");
                 return false;
             }
+    
             return true;
         }
-    </script>
+
+
+    </script>    
 </body>

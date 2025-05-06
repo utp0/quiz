@@ -228,6 +228,53 @@ class DbFunctions {
         return ret.rows[0];
     }
 
+    static async updateUserProfile(userId, username, email, hashedPassword, birthYear) {
+        try {
+            const fields = [];
+            const values = [];
+    
+            if (username) {
+                fields.push(`FELHASZNALONEV = :${fields.length + 1}`);
+                values.push(username);
+            }
+    
+            if (email) {
+                fields.push(`EMAIL = :${fields.length + 1}`);
+                values.push(email);
+            }
+    
+            if (hashedPassword) {
+                fields.push(`JELSZO = :${fields.length + 1}`);
+                values.push(hashedPassword);
+            }
+    
+            if (birthYear) {
+                fields.push(`SZULETESI_EV = :${fields.length + 1}`);
+                values.push(birthYear);
+            }
+    
+            if (fields.length === 0) throw new Error("Nincs frissítendő mező.");
+    
+            const sql = `UPDATE FELHASZNALO SET ${fields.join(', ')} WHERE ID = :${fields.length + 1}`;
+            values.push(userId);
+    
+            const result = await DbFunctions.dbInstance().execute(sql, values);
+            await DbFunctions.dbInstance().commit();
+    
+            if (result.rowsAffected === 0) {
+                throw new Error("A felhasználó nem található!");
+            }
+    
+            console.log(`Felhasználó frissítve: ID ${userId}`);
+            return true;
+        } catch (e) {
+            console.error("Hiba a profil frissítésekor:", e);
+            throw e;
+        }
+    }
+    
+    
+
     static async getAllUsers() {
         const sql = `
         SELECT

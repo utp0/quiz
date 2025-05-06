@@ -9,7 +9,7 @@ const quizController = require('./controllers/quizController');
  */
 const app = new express.Router();
 
-const { registerUser, loginToken, verifyToken, getUserById, getAllTemakor, createTemakor, getTekorById, updateTemakor, deleteTemakor, deleteToken, getAllKerdes, createKerdes, getKerdesById, updateKerdes, deleteKerdes, getAllKviz, getKvizById, createKviz, updateKviz, deleteKviz, getAllJatekszoba, createJatekszoba, deleteJatekszoba, getJatekszobaById, updateJatekszoba, checkFelhSzobaEredmeny } = require("./dbFunctions");
+const { registerUser, loginToken, verifyToken, getUserById, updateUserProfile, getAllTemakor, createTemakor, getTekorById, updateTemakor, deleteTemakor, deleteToken, getAllKerdes, createKerdes, getKerdesById, updateKerdes, deleteKerdes, getAllKviz, getKvizById, createKviz, updateKviz, deleteKviz, getAllJatekszoba, createJatekszoba, deleteJatekszoba, getJatekszobaById, updateJatekszoba, checkFelhSzobaEredmeny } = require("./dbFunctions");
 const DbFunctions = require("./dbFunctions");
 
 app.use(async (req, res, next) => {
@@ -136,6 +136,74 @@ app.get("/profile", async (req, res) => {
             quizes: quizes,
         }
     );
+});
+
+app.post("/profile", async (req, res) => {
+    const { username, email, password, confirmPassword, birthYear } = req.body;
+    const userId = res.locals.currentUser["ID"];
+
+    try {
+        let finalPassword = null;
+
+        // Jelszó ellenőrzés és hash-elés, ha meg lett adva
+        if (password && password === confirmPassword) {
+            const bcrypt = require('bcrypt');
+            finalPassword = await bcrypt.hash(password, 10);
+        }
+
+        await DbFunctions.updateUserProfile(userId, username, email, finalPassword, birthYear);
+
+        const updatedUser = await DbFunctions.getUserById(userId);
+        updatedUser["JELSZO"] = ""; // jelszót ne tároljuk a locals-ban
+        res.locals.currentUser = updatedUser;
+
+        const stats = await DbFunctions.getStatsForUser(res.locals.currentUser["ID"]);
+        let quizes = [];
+
+        for (const element of stats) {
+            try {
+                const quiz = await getKvizById(element["KVIZ_ID"]);
+                quizes.push(quiz);
+            } catch (error) {
+                console.error(`Kvíz lekérése sikertelen! id: ${element["KVIZ_ID"]}`);
+                quizes.push({});
+            }
+        }
+
+        return res.render("main",
+            {
+                page: "partial/profile",
+                title: "Profil",
+                successMessage: "Sikeres módosítás!",
+                stats: stats,
+                quizes: quizes,
+            }
+        );
+        
+    } catch (error) {
+        console.error("Profil frissítés hiba:", error);
+        const stats = await DbFunctions.getStatsForUser(res.locals.currentUser["ID"]);
+        let quizes = [];
+
+        for (const element of stats) {
+            try {
+                const quiz = await getKvizById(element["KVIZ_ID"]);
+                quizes.push(quiz);
+            } catch (error) {
+                console.error(`Kvíz lekérése sikertelen! id: ${element["KVIZ_ID"]}`);
+                quizes.push({});
+            }
+        }
+
+        return res.render("main",
+            {
+                page: "partial/profile",
+                title: "Profil",
+                stats: stats,
+                quizes: quizes,
+            }
+        );
+    }
 });
 
 app.get("/kviz/start/:id", requireLogin, quizController.startQuiz);
@@ -484,7 +552,14 @@ app.post("/kerdes", isAdmin, async (req, res) => {
 
     try {
         await createKerdes(nev);
-        res.redirect("/kerdes");
+        
+        const kerdesek = await getAllKerdes();
+
+        res.render("main", {
+            page: "kerdes/list",
+            title: "Kérdések",
+            kerdesek: kerdesek
+        });
     } catch (error) {
         res.render("main", {
             page: "kerdes/list",
