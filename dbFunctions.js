@@ -718,7 +718,7 @@ class DbFunctions {
         }
     }
 
-    static async updateJatekszoba(id, nev, maxJatekos, kvizId) {
+    static async updateJatekszoba(id, nev, felhasznaloId, maxJatekos, kvizId) {
         if (!nev || !felhasznaloId || !maxJatekos || !kvizId || maxJatekos < 2) {
             throw new Error("Hiányos vagy érvénytelen adatok a játékszoba létrehozásához.");
         }
