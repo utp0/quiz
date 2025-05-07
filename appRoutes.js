@@ -552,6 +552,11 @@ app.get("/kerdes/new", isAdmin, (req, res) => {
 app.post("/kerdes", isAdmin, async (req, res) => {
 
     const nev = req.body.nev?.trim();
+    const k1 = req.body.k1?.trim();
+    const k2 = req.body.k2?.trim();
+    const k3 = req.body.k3?.trim();
+    const k4 = req.body.k4?.trim();
+    const correctIndex = req.body.correctIndex?.trim();
 
     if (!nev || nev.length === 0) {
         return res.render("main", {
@@ -562,7 +567,7 @@ app.post("/kerdes", isAdmin, async (req, res) => {
     }
 
     try {
-        await createKerdes(nev);
+        await createKerdes(nev, k1, k2, k3, k4, correctIndex);
 
         const kerdesek = await getAllKerdes();
 

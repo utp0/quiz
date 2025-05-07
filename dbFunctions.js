@@ -547,7 +547,7 @@ class DbFunctions {
         }
     }
 
-    static async createKerdes(szoveg) {
+    static async createKerdes(szoveg, k1, k2, k3, k4, correctIndex) {
         const checkSql = `SELECT COUNT(*) FROM KERDES WHERE SZOVEG = :1`;
         try {
             const checkResult = await DbFunctions.dbInstance().execute(checkSql, [szoveg]);
@@ -562,6 +562,17 @@ class DbFunctions {
             const insertSql = `INSERT INTO KERDES (szoveg, kviz_id) VALUES (:1, :2)`;
             await DbFunctions.dbInstance().execute(insertSql, [szoveg, 99999]);
             await DbFunctions.dbInstance().commit();
+
+            const qsql = `INSERT INTO VALASZ (KERDES_ID, SZOVEG, HELYES) VALUES (:1, :2, :3)`;
+            const xd = await DbFunctions.dbInstance().execute(`SELECT max(id) asd FROM KERDES`);
+            let kindex = xd.rows[0][0];
+            const tomb = [k1, k2, k3, k4];
+            for(let qi = 0; qi < 4; qi++){
+                let asd = qi.toString() == correctIndex.toString();
+                let valasz = tomb[qi];
+                console.log(valasz);
+                await DbFunctions.dbInstance().execute(qsql, [kindex, valasz, asd ? 1 : 0]);
+            }
 
             console.log(`Új kérdés létrehozva: ${szoveg}`);
         } catch (e) {
