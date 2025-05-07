@@ -812,7 +812,7 @@ app.post("/jatekszoba/:id", requireLogin, isAdmin, async (req, res) => {
     if (req.body._method === "PUT") {
         const { nev, max_jatekos, kviz_id } = req.body;
         try {
-            await DbFunctions.updateJatekszoba(id, nev?.trim(), parseInt(max_jatekos), kviz_id);
+            await DbFunctions.updateJatekszoba(id, nev?.trim(), res.locals.currentUser["ID"], parseInt(max_jatekos), kviz_id);
             return res.redirect("/jatekszoba");
         } catch (err) {
             const szoba = await DbFunctions.getJatekszobaById(id);
