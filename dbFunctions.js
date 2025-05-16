@@ -29,11 +29,11 @@ class DbFunctions {
     static async swapPerms(userId) {
         let user = null;
         user = await DbFunctions.getUserById(userId);
-        if(user == null) {
+        if (user == null) {
             return false;
         }
         let newperm = "felhasznalo";
-        if(user["JOGOSULTSAG"] == "felhasznalo") {
+        if (user["JOGOSULTSAG"] == "felhasznalo") {
             newperm = "admin";
         }
         const sql = `
@@ -232,39 +232,39 @@ class DbFunctions {
         try {
             const fields = [];
             const values = [];
-    
+
             if (username) {
                 fields.push(`FELHASZNALONEV = :${fields.length + 1}`);
                 values.push(username);
             }
-    
+
             if (email) {
                 fields.push(`EMAIL = :${fields.length + 1}`);
                 values.push(email);
             }
-    
+
             if (hashedPassword) {
                 fields.push(`JELSZO = :${fields.length + 1}`);
                 values.push(hashedPassword);
             }
-    
+
             if (birthYear) {
                 fields.push(`SZULETESI_EV = :${fields.length + 1}`);
                 values.push(birthYear);
             }
-    
+
             if (fields.length === 0) throw new Error("Nincs frissítendő mező.");
-    
+
             const sql = `UPDATE FELHASZNALO SET ${fields.join(', ')} WHERE ID = :${fields.length + 1}`;
             values.push(userId);
-    
+
             const result = await DbFunctions.dbInstance().execute(sql, values);
             await DbFunctions.dbInstance().commit();
-    
+
             if (result.rowsAffected === 0) {
                 throw new Error("A felhasználó nem található!");
             }
-    
+
             console.log(`Felhasználó frissítve: ID ${userId}`);
             return true;
         } catch (e) {
@@ -272,8 +272,8 @@ class DbFunctions {
             throw e;
         }
     }
-    
-    
+
+
 
     static async getAllUsers() {
         const sql = `
@@ -420,7 +420,7 @@ class DbFunctions {
             const params = {
                 searchTerm: `%${searchTerm}%`
             };
-        
+
             const result = await DbFunctions.dbInstance().execute(sql, params);
 
             return result.rows.map(row => ({
@@ -504,10 +504,20 @@ class DbFunctions {
     static async createKviz(nev, leiras, felhasznaloId) {
         const sql = `
             INSERT INTO Kviz (id, nev, leiras, letrehozas_datuma, felhasznalo_id)
-            VALUES (kviz_seq.NEXTVAL, :1, :2, SYSDATE, :3)
+            VALUES (null, :1, :2, SYSDATE, :3)
+            RETURN ID INTO :id
         `;
         try {
-            await DbFunctions.dbInstance().execute(sql, [nev, leiras, felhasznaloId], { autoCommit: true });
+            const result = await DbFunctions.dbInstance().execute(sql,
+                {
+                    '1': nev,
+                    '2': leiras,
+                    '3': felhasznaloId,
+                    'id': { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
+                },
+                { autoCommit: true });
+            const newQuizId = result.outBinds ? result.outBinds.id ?? null : null;
+            return newQuizId;
         } catch (e) {
             console.error("Hiba a kvíz létrehozásánál:", e);
             throw e;
@@ -535,12 +545,12 @@ class DbFunctions {
     }
 
     static async getAllKerdes() {
-        const sql = `SELECT id, szoveg FROM KERDES ORDER BY szoveg`;
+        const sql = `SELECT id, szoveg, kviz_id FROM KERDES ORDER BY szoveg`;
         try {
             const result = await DbFunctions.dbInstance().execute(sql, [],
                 { outFormat: oracledb.OUT_FORMAT_OBJECT }
             );
-            return result.rows.map(row => ({ id: row["ID"], nev: row["SZOVEG"] }));
+            return result.rows.map(row => ({ id: row["ID"], nev: row["SZOVEG"], kviz_id: row["KVIZ_ID"] }));
         } catch (e) {
             console.error("Hiba a kérdések lekérdezésénél:", e);
             throw e;
@@ -567,7 +577,7 @@ class DbFunctions {
             const xd = await DbFunctions.dbInstance().execute(`SELECT max(id) asd FROM KERDES`);
             let kindex = xd.rows[0][0];
             const tomb = [k1, k2, k3, k4];
-            for(let qi = 0; qi < 4; qi++){
+            for (let qi = 0; qi < 4; qi++) {
                 let asd = qi.toString() == correctIndex.toString();
                 let valasz = tomb[qi];
                 console.log(valasz);
@@ -623,6 +633,23 @@ class DbFunctions {
         } catch (e) {
             console.error("Hiba a kérdés frissítésekor:", e);
             throw e;
+        }
+    }
+
+    static async assignQuestionToQuiz(question_id, quiz_id) {
+        if (parseInt(question_id).toString() === "NaN" || parseInt(quiz_id).toString() === "NaN") {
+            throw TypeError("question_id és quiz_id parse-olható szám kell legyen!");
+        }
+        const sql = "UPDATE KERDES SET KVIZ_ID = :quizId WHERE ID = :questionId";
+        try {
+            const result = await DbFunctions.dbInstance().execute(sql, {
+                questionId: question_id,
+                quizId: quiz_id
+            },
+                { autoCommit: true });
+            return true;
+        } catch (error) {
+            throw error;
         }
     }
 

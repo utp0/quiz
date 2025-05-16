@@ -395,14 +395,19 @@ app.get("/kviz", async (req, res) => {
     }
 });
 
-app.get("/kviz/new", isAdmin, (req, res) => {
+app.get("/kviz/new", requireLogin, isAdmin, async (req, res) => {
     if (!res.locals.currentUser) {
         return res.redirect("/login");
     }
 
+    const kerdesek = await getAllKerdes();
+    const unsafe = parseInt(req.query.unsafe) === 1;
+
     res.render("main", {
         page: "kviz/kviznew",
-        title: "Új kvíz"
+        title: "Új kvíz",
+        kerdesek: kerdesek,
+        unsafe: unsafe ?? false
     });
 });
 
@@ -433,13 +438,25 @@ app.get("/kviz/:id", async (req, res) => {
 
 
 
-app.post("/kviz", async (req, res) => {
+app.post("/kviz", requireLogin, isAdmin, async (req, res) => {
     if (!res.locals.currentUser) {
         return res.redirect("/login");
     }
 
     const nev = req.body.nev?.trim();
     const leiras = req.body.leiras?.trim() || "";
+
+    // Kiválasztott kérdések kigyűjtése
+    let questionIds = [];
+    Object.keys(req.body).forEach(key => {
+        const splitted = key.split("_");
+        if (splitted.length === 2 && splitted[0] === "kerdes") {
+            const qId = parseInt(splitted[1]);
+            if (qId.toString() === "NaN") return;
+            questionIds.push(qId);
+        }
+    });
+
 
     if (!nev || nev.length === 0) {
         return res.render("main", {
@@ -450,7 +467,25 @@ app.post("/kviz", async (req, res) => {
     }
 
     try {
-        await createKviz(nev, leiras, res.locals.currentUser.ID);
+        const newQuizId = await createKviz(nev, leiras, res.locals.currentUser.ID);
+        for (let i = 0; i < questionIds.length; i++) {
+            try {
+                await DbFunctions.assignQuestionToQuiz(
+                    questionIds[i],
+                    newQuizId[0]
+                );
+            } catch (error) {
+                console.error(`Hiba kérdés kvízhez rendelése közben! kvíz id: ${newQuizId}, kérdés id: ${questionIds[i]}`);
+                res.render("main", {
+                    page: "kviz/kviznew",
+                    title: "Új kvíz",
+                    error: "Hiba történt a kérdések kvízhez rendelésekor!"
+                });
+                console.error(error);
+                
+                return false;
+            }
+        }
         res.redirect("/kviz");
     } catch (error) {
         console.error("Hiba a kvíz létrehozásánál:", error);
@@ -462,7 +497,7 @@ app.post("/kviz", async (req, res) => {
     }
 });
 
-app.get("/kviz/:id/edit", isAdmin, async (req, res) => {
+app.get("/kviz/:id/edit", requireLogin, isAdmin, async (req, res) => {
     const id = parseInt(req.params.id);
     if (isNaN(id)) return res.status(400).send("Érvénytelen kvíz azonosító");
 

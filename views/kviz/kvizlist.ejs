@@ -18,6 +18,7 @@
 <% } else { %>
     <ul id="kviz-lista">
         <% kvizek.forEach(kviz => { %>
+            <% if(kviz["id"] === 99999) return; // 99999 kvíz-t nem mutassuk %>
             <li class="kviz-elem">
                 <strong><a href="/kviz/<%= kviz.id %>"><%= kviz.nev %></a></strong><br>
                 <em><%= kviz.leiras %></em><br>

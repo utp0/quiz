@@ -1,7 +1,7 @@
 <h2>Új kvíz létrehozása</h2>
 
 <% if (typeof error !== "undefined") { %>
-    <p style="color: red;"><%= error %></p>
+<p style="color: red;"><%= error %></p>
 <% } %>
 
 <form action="/kviz" method="POST">
@@ -10,6 +10,21 @@
 
     <label for="leiras">Leírás:</label><br>
     <textarea id="leiras" name="leiras" rows="5"></textarea><br><br>
+
+    <h3>Válassz kérdéseket!</h3>
+    <p>Csak a más kvízben nem használt kérdések jelennek meg ezen a listán!<br>
+        <span style="font-size: small;"><a href="/kviz/new?unsafe=1">Minden kérdés megjelenítése (elronthat más kvízeket)</a></span>
+    </p>
+
+    <% 
+    for(let i = 0; locals.kerdesek && i < locals.kerdesek.length; i++) { 
+        if(!locals.kerdesek[i]["kviz_id"] || locals.kerdesek[i]["kviz_id"] === 99999 || !!(locals.unsafe)){ %>
+    <input type="checkbox" id="kerdes_<%=locals.kerdesek[i]["id"]%>" name="kerdes_<%=locals.kerdesek[i]["id"]%>" value="<%=locals.kerdesek[i]["id"]%>">
+    <label for="kerdes_<%=locals.kerdesek[i]["id"]%>"><%=locals.kerdesek[i]["nev"]%></label><br>
+    <%
+        }}
+    %>
+    <br>
 
     <button type="submit">Létrehozás</button>
 </form>

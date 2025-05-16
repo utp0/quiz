@@ -40,6 +40,11 @@ form input:not([type="submit"]) {
   margin-bottom: 10px;
 }
 
+form input[type="checkbox"], form input[type="radio"] { 
+  /* TODO: e itt ronda még kérdés létrehozásánál így is (type="radio") */
+  width: auto;
+}
+
 h2 {
   margin-bottom: 15px;
 }
