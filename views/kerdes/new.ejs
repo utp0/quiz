@@ -2,15 +2,21 @@
 
 <form action="/kerdes" method="POST" class="tema-form">
     <div class="form-group">
-        <label for="nev">Kérdés:</label>
+        <label for="nev">Kérdés (a helyes választ kérjük megjelölni):</label>
         <input type="text" id="nev" name="nev" required>
         <% if (locals.error) { %>
             <p class="error-message"><%= locals.error %></p>
         <% } %>
-        <input type="text" id="k1" name="k1" required><input type="radio" name="correctIndex" value="0">
-        <input type="text" id="k2" name="k2" required><input type="radio" name="correctIndex" value="1">
-        <input type="text" id="k3" name="k3" required><input type="radio" name="correctIndex" value="2">
-        <input type="text" id="k4" name="k4" required><input type="radio" name="correctIndex" value="3">
+        <div class="container" style="text-align: center;">
+        <label for="k1">1. válasz lehetőség:</label>
+        <input type="text" id="k1" name="k1" required><input type="radio" name="correctIndex" value="0" style="display: block;">
+        <label for="k2">2. válasz lehetőség:</label>
+        <input type="text" id="k2" name="k2" required><input type="radio" name="correctIndex" value="1" style="display: block;">
+        <label for="k3">3. válasz lehetőség:</label>
+        <input type="text" id="k3" name="k3" required><input type="radio" name="correctIndex" value="2" style="display: block;">
+        <label for="k4">4. válasz lehetőség:</label>
+        <input type="text" id="k4" name="k4" required><input type="radio" name="correctIndex" value="3" style="display: block;">
+        </div>
     </div>
     
     <div class="button-group">

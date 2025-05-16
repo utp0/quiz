@@ -43,6 +43,10 @@ DROP TABLE LOGINLOG CASCADE CONSTRAINTS;
 
 DROP TABLE FELHASZNALO_SZOBA_CSATLAKOZAS CASCADE CONSTRAINTS;
 
+DROP SEQUENCE hiba_naplo_seq;
+DROP PROCEDURE NAPLOZO_HIBA;
+DROP TABLE HIBA_NAPLO;
+
 
 --tábladefiníciók
 
@@ -154,6 +158,16 @@ CREATE TABLE FELHASZNALO_SZOBA_CSATLAKOZAS (
     felhasznalo_id NUMBER NOT NULL PRIMARY KEY,
 	datum DATE DEFAULT SYSDATE NOT NULL,
 	FOREIGN KEY (felhasznalo_id) REFERENCES Felhasznalo(id) ON DELETE CASCADE
+);
+
+CREATE TABLE HIBA_NAPLO (
+    id NUMBER PRIMARY KEY,
+    idopont TIMESTAMP DEFAULT SYSTIMESTAMP,
+    hiba_uzenet VARCHAR2(4000),
+    hiba_kod VARCHAR2(100),
+    fuggveny_nev VARCHAR2(100),
+    felhasznalo_id NUMBER,
+    egyeb_info VARCHAR2(1000)
 );
 
 
@@ -303,6 +317,10 @@ BEGIN
 END;
 /
 
+CREATE SEQUENCE hiba_naplo_seq 
+START WITH 1 
+INCREMENT BY 1;
+
 
 CREATE OR REPLACE TRIGGER TRG_LOG_SZOBA_CSATLAKOZAS
 AFTER INSERT OR UPDATE ON JATEKSZOBA_CSATLAKOZAS
@@ -352,6 +370,26 @@ EXCEPTION
     WHEN OTHERS THEN
         ROLLBACK;
         RETURN 0;
+END;
+/
+
+CREATE OR REPLACE PROCEDURE NAPLOZO_HIBA(
+    p_hiba_uzenet IN VARCHAR2,
+    p_hiba_kod IN VARCHAR2 DEFAULT NULL,
+    p_fuggveny_nev IN VARCHAR2 DEFAULT NULL,
+    p_felhasznalo_id IN NUMBER DEFAULT NULL,
+    p_egyeb_info IN VARCHAR2 DEFAULT NULL
+) AS
+    PRAGMA AUTONOMOUS_TRANSACTION;
+BEGIN
+    INSERT INTO HIBA_NAPLO (id, idopont, hiba_uzenet, hiba_kod, fuggveny_nev, felhasznalo_id, egyeb_info)
+    VALUES (hiba_naplo_seq.NEXTVAL, SYSTIMESTAMP, p_hiba_uzenet, p_hiba_kod, p_fuggveny_nev, p_felhasznalo_id, p_egyeb_info);
+
+    COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Hibanaplózási hiba: ' || SQLERRM);
+        ROLLBACK;
 END;
 /
 

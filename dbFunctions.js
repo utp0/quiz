@@ -23,6 +23,12 @@ class DbFunctions {
             console.log(`Regisztráció siker: ${username}`);
         } catch (e) {
             console.error(e);
+            //hiba_logolas
+            const sql = `BEGIN naplozo_hiba(:hiba_uzenet, :hiba_kod, :fuggveny_nev, :felhasznalo_id, :egyeb_info); END;`
+
+            const hiba = await DbFunctions.dbInstance().execute(sql, ["Hiba a regisztrációkor", "1", "registerUser", 0, `felhasznalonev: ${username}`]);
+            await DbFunctions.dbInstance().commit();
+            throw(e);
         }
     }
 
@@ -46,6 +52,11 @@ class DbFunctions {
             });
             return true;
         } catch (error) {
+            //hiba_logolas
+            const sql = `BEGIN naplozo_hiba(:hiba_uzenet, :hiba_kod, :fuggveny_nev, :felhasznalo_id, :egyeb_info); END;`
+
+            const hiba = await DbFunctions.dbInstance().execute(sql, ["Hiba a jogosultság módosításakor", "2", "swapPerms", userId, ""]);
+            await DbFunctions.dbInstance().commit();
             return false;
         }
     }
@@ -61,6 +72,11 @@ class DbFunctions {
             return true;
         } catch (e) {
             console.error(`Nem sikerült a felhasználó törlése (${userId})\n`, e);
+            //hiba_logolas
+            const sql = `BEGIN naplozo_hiba(:hiba_uzenet, :hiba_kod, :fuggveny_nev, :felhasznalo_id, :egyeb_info); END;`
+
+            const hiba = await DbFunctions.dbInstance().execute(sql, ["Hiba a felhasználó törlésekor", "2", "deleteUser", userId, ""]);
+            await DbFunctions.dbInstance().commit();
             throw e;
         }
     }
@@ -221,6 +237,11 @@ class DbFunctions {
             });
         } catch (e) {
             console.error(`Hiba felhasználó id alapján lekérése közben (${userId})`, e);
+            //hiba_logolas
+            const sql = `BEGIN naplozo_hiba(:hiba_uzenet, :hiba_kod, :fuggveny_nev, :felhasznalo_id, :egyeb_info); END;`
+
+            const hiba = await DbFunctions.dbInstance().execute(sql, ["Hiba felhasználó id alapján lekérése közben", "2", "getUserById", userId, ""]);
+            await DbFunctions.dbInstance().commit();
         }
         if (!ret.rows || ret.rows.length == 0 || ret.rows.length > 1) {
             return null;  // vagy nincs, vagy több van (unique miatt nem lehet)
@@ -269,6 +290,11 @@ class DbFunctions {
             return true;
         } catch (e) {
             console.error("Hiba a profil frissítésekor:", e);
+            //hiba_logolas
+            const sql = `BEGIN naplozo_hiba(:hiba_uzenet, :hiba_kod, :fuggveny_nev, :felhasznalo_id, :egyeb_info); END;`
+
+            const hiba = await DbFunctions.dbInstance().execute(sql, ["Hiba a profil frissítésekor", "2", "updateUserProfile", userId, ""]);
+            await DbFunctions.dbInstance().commit();
             throw e;
         }
     }
@@ -294,6 +320,11 @@ class DbFunctions {
             });
         } catch (e) {
             console.error(`Hiba az összes felhasználó lekérése közben.\n`, e);
+            //hiba_logolas
+            const sql = `BEGIN naplozo_hiba(:hiba_uzenet, :hiba_kod, :fuggveny_nev, :felhasznalo_id, :egyeb_info); END;`
+
+            const hiba = await DbFunctions.dbInstance().execute(sql, ["Hiba az összes felhasználó lekérése közben", "2", "getAllUsers", 0, ""]);
+            await DbFunctions.dbInstance().commit();
         }
         if (!ret.rows || ret.rows.length == 0) {
             return null;
@@ -308,6 +339,11 @@ class DbFunctions {
             return result.rows.map(row => ({ id: row[0], nev: row[1] }));
         } catch (e) {
             console.error("Hiba a témakörök lekérdezésénél:", e);
+            //hiba_logolas
+            const sql = `BEGIN naplozo_hiba(:hiba_uzenet, :hiba_kod, :fuggveny_nev, :felhasznalo_id, :egyeb_info); END;`
+
+            const hiba = await DbFunctions.dbInstance().execute(sql, ["Hiba a témakörök lekérdezésénél", "2", "getAllTemakor", 0, ""]);
+            await DbFunctions.dbInstance().commit();
             throw e;
         }
     }
@@ -332,6 +368,11 @@ class DbFunctions {
             return nextId;
         } catch (e) {
             console.error("Hiba a témakör létrehozásakor:", e);
+            //hiba_logolas
+            const sql = `BEGIN naplozo_hiba(:hiba_uzenet, :hiba_kod, :fuggveny_nev, :felhasznalo_id, :egyeb_info); END;`
+
+            const hiba = await DbFunctions.dbInstance().execute(sql, ["Hiba a témakör létrehozásakor", "2", "createTemakor", 0, nev]);
+            await DbFunctions.dbInstance().commit();
             throw e;
         }
     }
@@ -351,6 +392,11 @@ class DbFunctions {
             };
         } catch (e) {
             console.error("Hiba a témakör lekérdezésénél:", e);
+            //hiba_logolas
+            const sql = `BEGIN naplozo_hiba(:hiba_uzenet, :hiba_kod, :fuggveny_nev, :felhasznalo_id, :egyeb_info); END;`
+
+            const hiba = await DbFunctions.dbInstance().execute(sql, ["Hiba a témakör lékérdezésénél", "2", "getTekorById", 0, `temakor id: ${id}`]);
+            await DbFunctions.dbInstance().commit();
             throw e;
         }
     }
@@ -375,6 +421,11 @@ class DbFunctions {
             return true;
         } catch (e) {
             console.error("Hiba a témakör frissítésekor:", e);
+            //hiba_logolas
+            const sql = `BEGIN naplozo_hiba(:hiba_uzenet, :hiba_kod, :fuggveny_nev, :felhasznalo_id, :egyeb_info); END;`
+
+            const hiba = await DbFunctions.dbInstance().execute(sql, ["Hiba a témakör frissitesekor", "2", "updateTemakor", 0, `temakor id: ${id}`]);
+            await DbFunctions.dbInstance().commit();
             throw e;
         }
     }
@@ -393,6 +444,11 @@ class DbFunctions {
             return true;
         } catch (e) {
             console.error("Hiba a témakör törlésekor:", e);
+            //hiba_logolas
+            const sql = `BEGIN naplozo_hiba(:hiba_uzenet, :hiba_kod, :fuggveny_nev, :felhasznalo_id, :egyeb_info); END;`
+
+            const hiba = await DbFunctions.dbInstance().execute(sql, ["Hiba a témakör törlésekor", "2", "deleteTemakor", 0, `temakor id: ${id}`]);
+            await DbFunctions.dbInstance().commit();
             throw e;
         }
     }
@@ -432,6 +488,11 @@ class DbFunctions {
             }));
         } catch (e) {
             console.error("Hiba a kvízek keresésénél:", e);
+            //hiba_logolas
+            const sql = `BEGIN naplozo_hiba(:hiba_uzenet, :hiba_kod, :fuggveny_nev, :felhasznalo_id, :egyeb_info); END;`
+
+            const hiba = await DbFunctions.dbInstance().execute(sql, ["Hiba a kvízek keresésénél", "1", "searchKviz", 0, `${searchTerm}`]);
+            await DbFunctions.dbInstance().commit();
             throw e;
         }
     }
@@ -461,6 +522,11 @@ class DbFunctions {
             }));
         } catch (e) {
             console.error("Hiba a kvízek lekérdezésénél:", e);
+            //hiba_logolas
+            const sql = `BEGIN naplozo_hiba(:hiba_uzenet, :hiba_kod, :fuggveny_nev, :felhasznalo_id, :egyeb_info); END;`
+
+            const hiba = await DbFunctions.dbInstance().execute(sql, ["Hiba a kvízek lekérdezésénél", "2", "getAllKviz", 0, ""]);
+            await DbFunctions.dbInstance().commit();
             throw e;
         }
     }
@@ -497,6 +563,11 @@ class DbFunctions {
             };
         } catch (e) {
             console.error("Hiba a kvíz lekérdezésénél:", e);
+            //hiba_logolas
+            const sql = `BEGIN naplozo_hiba(:hiba_uzenet, :hiba_kod, :fuggveny_nev, :felhasznalo_id, :egyeb_info); END;`
+
+            const hiba = await DbFunctions.dbInstance().execute(sql, ["Hiba a kvíz lekérdezésénél", "2", "getKvizById", 0, `kviz id: ${id}`]);
+            await DbFunctions.dbInstance().commit();
             throw e;
         }
     }
@@ -520,6 +591,11 @@ class DbFunctions {
             return newQuizId;
         } catch (e) {
             console.error("Hiba a kvíz létrehozásánál:", e);
+            //hiba_logolas
+            const sql = `BEGIN naplozo_hiba(:hiba_uzenet, :hiba_kod, :fuggveny_nev, :felhasznalo_id, :egyeb_info); END;`
+
+            const hiba = await DbFunctions.dbInstance().execute(sql, ["Hiba a kvíz létrehozásánál", "2", "createKviz", felhasznaloId, `kviz neve: ${nev}`]);
+            await DbFunctions.dbInstance().commit();
             throw e;
         }
     }
@@ -530,6 +606,11 @@ class DbFunctions {
             await DbFunctions.dbInstance().execute(sql, [nev, leiras, id], { autoCommit: true });
         } catch (e) {
             console.error("Hiba a kvíz frissítésénél:", e);
+            //hiba_logolas
+            const sql = `BEGIN naplozo_hiba(:hiba_uzenet, :hiba_kod, :fuggveny_nev, :felhasznalo_id, :egyeb_info); END;`
+
+            const hiba = await DbFunctions.dbInstance().execute(sql, ["Hiba a kvíz frissítésénél", "2", "updateKviz", 0, `kviz id: ${id}`]);
+            await DbFunctions.dbInstance().commit();
             throw e;
         }
     }
@@ -540,6 +621,11 @@ class DbFunctions {
             await DbFunctions.dbInstance().execute(sql, [id], { autoCommit: true });
         } catch (e) {
             console.error("Hiba a kvíz törlésénél:", e);
+            //hiba_logolas
+            const sql = `BEGIN naplozo_hiba(:hiba_uzenet, :hiba_kod, :fuggveny_nev, :felhasznalo_id, :egyeb_info); END;`
+
+            const hiba = await DbFunctions.dbInstance().execute(sql, ["Hiba a kvíz törlésénél", "2", "deleteKviz", 0, `kviz id: ${id}`]);
+            await DbFunctions.dbInstance().commit();
             throw e;
         }
     }
@@ -553,6 +639,11 @@ class DbFunctions {
             return result.rows.map(row => ({ id: row["ID"], nev: row["SZOVEG"], kviz_id: row["KVIZ_ID"] }));
         } catch (e) {
             console.error("Hiba a kérdések lekérdezésénél:", e);
+            //hiba_logolas
+            const sql = `BEGIN naplozo_hiba(:hiba_uzenet, :hiba_kod, :fuggveny_nev, :felhasznalo_id, :egyeb_info); END;`
+
+            const hiba = await DbFunctions.dbInstance().execute(sql, ["Hiba a kérdések lekérdezésénél", "2", "getAllKerdes", 0, ""]);
+            await DbFunctions.dbInstance().commit();
             throw e;
         }
     }
@@ -587,6 +678,11 @@ class DbFunctions {
             console.log(`Új kérdés létrehozva: ${szoveg}`);
         } catch (e) {
             console.error("Hiba a kérdés létrehozásakor:", e);
+            //hiba_logolas
+            const sql = `BEGIN naplozo_hiba(:hiba_uzenet, :hiba_kod, :fuggveny_nev, :felhasznalo_id, :egyeb_info); END;`
+
+            const hiba = await DbFunctions.dbInstance().execute(sql, ["Hiba a kérdés létrehozásakor", "2", "createKerdes", 0, `kerdes szovege: ${szoveg}`]);
+            await DbFunctions.dbInstance().commit();
             throw e;
         }
     }
@@ -608,6 +704,11 @@ class DbFunctions {
             };
         } catch (e) {
             console.error("Hiba a témakör lekérdezésénél:", e);
+            //hiba_logolas
+            const sql = `BEGIN naplozo_hiba(:hiba_uzenet, :hiba_kod, :fuggveny_nev, :felhasznalo_id, :egyeb_info); END;`
+
+            const hiba = await DbFunctions.dbInstance().execute(sql, ["Hiba a kérdés lekérdezésénél", "2", "getKerdesById", 0, `kerdes id: ${id}`]);
+            await DbFunctions.dbInstance().commit();
             throw e;
         }
     }
@@ -632,6 +733,11 @@ class DbFunctions {
             return true;
         } catch (e) {
             console.error("Hiba a kérdés frissítésekor:", e);
+            //hiba_logolas
+            const sql = `BEGIN naplozo_hiba(:hiba_uzenet, :hiba_kod, :fuggveny_nev, :felhasznalo_id, :egyeb_info); END;`
+
+            const hiba = await DbFunctions.dbInstance().execute(sql, ["Hiba a kérdés frissítésekor", "2", "updateKerdes", 0, `kerdes id: ${id}`]);
+            await DbFunctions.dbInstance().commit();
             throw e;
         }
     }
@@ -667,6 +773,11 @@ class DbFunctions {
             return true;
         } catch (e) {
             console.error("Hiba a kérdés törlésekor:", e);
+            //hiba_logolas
+            const sql = `BEGIN naplozo_hiba(:hiba_uzenet, :hiba_kod, :fuggveny_nev, :felhasznalo_id, :egyeb_info); END;`
+
+            const hiba = await DbFunctions.dbInstance().execute(sql, ["Hiba a kérdés törlésekor", "2", "deleteKerdes", 0, `kerdes id: ${id}`]);
+            await DbFunctions.dbInstance().commit();
             throw e;
         }
     }
@@ -685,6 +796,11 @@ class DbFunctions {
             return result.rows;
         } catch (e) {
             console.error("Hiba a játékszobák lekérdezésekor:", e);
+            //hiba_logolas
+            const sql = `BEGIN naplozo_hiba(:hiba_uzenet, :hiba_kod, :fuggveny_nev, :felhasznalo_id, :egyeb_info); END;`
+
+            const hiba = await DbFunctions.dbInstance().execute(sql, ["Hiba a játékszobák lekérdezésekor", "2", "getAllJatekszoba", 0, ""]);
+            await DbFunctions.dbInstance().commit();
             throw e;
         }
     }
@@ -715,6 +831,11 @@ class DbFunctions {
             console.log(`Új játékszoba létrehozva: ${nev}`);
         } catch (e) {
             console.error("Hiba a játékszoba létrehozásakor:", e);
+            //hiba logolas
+            const sql = `BEGIN naplozo_hiba(:hiba_uzenet, :hiba_kod, :fuggveny_nev, :felhasznalo_id, :egyeb_info); END;`
+
+            const hiba = await DbFunctions.dbInstance().execute(sql, ["Hiba a játékszoba létrehozásakor", "2", "createJatekszoba", felhasznaloId, `jatekszoba neve: ${nev}`]);
+            await DbFunctions.dbInstance().commit();
             throw e;
         }
     }
@@ -741,6 +862,11 @@ class DbFunctions {
             return result.rows[0];
         } catch (e) {
             console.error("Hiba a játékszoba lekérdezésekor:", e);
+            //hiba logolas
+            const sql = `BEGIN naplozo_hiba(:hiba_uzenet, :hiba_kod, :fuggveny_nev, :felhasznalo_id, :egyeb_info); END;`
+
+            const hiba = await DbFunctions.dbInstance().execute(sql, ["Hiba a játékszoba lekérdezésekor", "2", "getJatekszobaById", 0, `jatekszoba id: ${id}`]);
+            await DbFunctions.dbInstance().commit();
             throw e;
         }
     }
@@ -760,6 +886,11 @@ class DbFunctions {
             return true;
         } catch (e) {
             console.error("Hiba a játékszoba frissítésekor:", e);
+            //hiba_logolas
+            const sql = `BEGIN naplozo_hiba(:hiba_uzenet, :hiba_kod, :fuggveny_nev, :felhasznalo_id, :egyeb_info); END;`
+
+            const hiba = await DbFunctions.dbInstance().execute(sql, ["Hiba a játékszoba frissítésekor", "2", "updateJatekszoba", felhasznaloId, `jatekszoba id: ${id}`]);
+            await DbFunctions.dbInstance().commit();
             throw e;
         }
     }
@@ -790,6 +921,11 @@ class DbFunctions {
             return true;
         } catch (e) {
             console.error("Hiba a játékszoba törlésekor:", e);
+            //hiba logolas
+            const sql = `BEGIN naplozo_hiba(:hiba_uzenet, :hiba_kod, :fuggveny_nev, :felhasznalo_id, :egyeb_info); END;`
+
+            const hiba = await DbFunctions.dbInstance().execute(sql, ["Hiba a játékszoba törlésekor", "2", "deleteJatekszoba", 0, `jatekszoba id: ${id}`]);
+            await DbFunctions.dbInstance().commit();
             throw e;
         }
     }
@@ -825,6 +961,11 @@ class DbFunctions {
             return result.rows ?? null;
         } catch (e) {
             console.error(`Hiba felhasználói statisztikák lekérésekor! userId: ${userId}`, e);
+            //hiba_logolas
+            const sql = `BEGIN naplozo_hiba(:hiba_uzenet, :hiba_kod, :fuggveny_nev, :felhasznalo_id, :egyeb_info); END;`
+
+            const hiba = await DbFunctions.dbInstance().execute(sql, ["Hiba a felhasználói statisztikák lekérésekor", "2", "getStatsForUser", userId, ""]);
+            await DbFunctions.dbInstance().commit();
             return null;
         }
     }
