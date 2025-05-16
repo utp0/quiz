@@ -394,24 +394,283 @@ END;
 /
 
 
---példaadatok beszúrása
+-- Példaadatok beszúrása
 
--- Felhasznalo tábla
-INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('teszt1', 'teszt1@example.com', 'hashed_password1', 1995, 'admin');
-INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('teszt2', 'teszt2@example.com', 'hashed_password2', 2000, 'felhasznalo');
-INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('teszt3', 'teszt3@example.com', 'hashed_password3', 1998, 'felhasznalo');
-INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('teszt4', 'teszt4@example.com', 'hashed_password4', 1992, 'admin');
-INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('teszt5', 'teszt5@example.com', 'hashed_password5', 1999, 'felhasznalo');
-INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('teszt6', 'teszt6@example.com', 'hashed_password6', 2001, 'felhasznalo');
-INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('teszt7', 'teszt7@example.com', 'hashed_password7', 1987, 'admin');
-INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('teszt8', 'teszt8@example.com', 'hashed_password8', 1994, 'felhasznalo');
+-- Felhasznalo tábla (10 felhasználó)
+INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('admin', 'admin@quiz.hu', 'admin123', 1990, 'admin');
+INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('tanar2', 'tanar1@quiz.hu', 'tanar123', 1985, 'admin');
+INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('diák1', 'diak1@quiz.hu', 'diak123', 2000, 'felhasznalo');
+INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('diák2', 'diak2@quiz.hu', 'jelszo123', 2001, 'felhasznalo');
+INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('kvízmester', 'kvizmester@quiz.hu', 'kviz123', 1992, 'admin');
+INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('jatekos1', 'jatekos1@gmail.com', 'jelszo456', 1995, 'felhasznalo');
+INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('jatekos2', 'jatekos2@gmail.com', 'pass789', 1998, 'felhasznalo');
+INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('oktatási_szakértő', 'oktato@quiz.hu', 'oktato123', 1980, 'admin');
+INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('vendég', 'vendeg@gmail.com', 'vendeg123', 2002, 'felhasznalo');
+INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('teszt_user', 'teszt@quiz.hu', 'teszt123', 1997, 'felhasznalo');
 
--- Kviz tábla
-INSERT INTO Kviz (nev, leiras, felhasznalo_id) VALUES ('Történelem kvíz', 'Egy izgalmas történelem kvíz.', 1);
-INSERT INTO Kviz (nev, leiras, felhasznalo_id) VALUES ('Tudományos kvíz', 'Általános tudományos kérdések.', 4);
-INSERT INTO Kviz (nev, leiras, felhasznalo_id) VALUES ('Művészet kvíz', 'Festmények, szobrok és művészek.', 7);
-INSERT INTO Kviz (nev, leiras, felhasznalo_id) VALUES ('Földrajzi kvíz', 'Világ országai és városai.', 1);
-INSERT INTO Kviz (nev, leiras, felhasznalo_id) VALUES ('Irodalom kvíz', 'Híres írók és művek.', 4);
+-- Temakor tábla (10 témakör)
+INSERT INTO Temakor (nev) VALUES ('Történelem');
+INSERT INTO Temakor (nev) VALUES ('Matematika');
+INSERT INTO Temakor (nev) VALUES ('Irodalom');
+INSERT INTO Temakor (nev) VALUES ('Földrajz');
+INSERT INTO Temakor (nev) VALUES ('Biológia');
+INSERT INTO Temakor (nev) VALUES ('Informatika');
+INSERT INTO Temakor (nev) VALUES ('Fizika');
+INSERT INTO Temakor (nev) VALUES ('Kémia');
+INSERT INTO Temakor (nev) VALUES ('Művészet');
+INSERT INTO Temakor (nev) VALUES ('Sport');
+
+-- Kviz tábla (8 kvíz)
+INSERT INTO Kviz (nev, leiras, letrehozas_datuma, felhasznalo_id) VALUES ('Történelmi alapok', 'Alap történelmi ismereteket mérő kvíz.', TO_DATE('2023-01-15', 'YYYY-MM-DD'), 1);
+INSERT INTO Kviz (nev, leiras, letrehozas_datuma, felhasznalo_id) VALUES ('Matematikai kihívás', 'Középszintű matematikai feladatok.', TO_DATE('2023-02-10', 'YYYY-MM-DD'), 2);
+INSERT INTO Kviz (nev, leiras, letrehozas_datuma, felhasznalo_id) VALUES ('Irodalmi barangolás', 'Magyar és világirodalmi kérdések.', TO_DATE('2023-03-05', 'YYYY-MM-DD'), 5);
+INSERT INTO Kviz (nev, leiras, letrehozas_datuma, felhasznalo_id) VALUES ('Földrajzi felfedezések', 'Utazz velünk a világban!', TO_DATE('2023-04-20', 'YYYY-MM-DD'), 8);
+INSERT INTO Kviz (nev, leiras, letrehozas_datuma, felhasznalo_id) VALUES ('IT szakértő', 'Informatikai alapismeretek tesztelése.', TO_DATE('2023-05-12', 'YYYY-MM-DD'), 1);
+INSERT INTO Kviz (nev, leiras, letrehozas_datuma, felhasznalo_id) VALUES ('Biológiai sokszínűség', 'Az élővilág csodái.', TO_DATE('2023-06-08', 'YYYY-MM-DD'), 2);
+INSERT INTO Kviz (nev, leiras, letrehozas_datuma, felhasznalo_id) VALUES ('Művészeti stílusok', 'Művészettörténeti kvíz.', TO_DATE('2023-07-22', 'YYYY-MM-DD'), 8);
+INSERT INTO Kviz (nev, leiras, letrehozas_datuma, felhasznalo_id) VALUES ('Sporttörténet', 'Érdekességek a sport világából.', TO_DATE('2023-08-15', 'YYYY-MM-DD'), 5);
+
+-- Kerdes tábla (24 kérdés - kvízenként 3 kérdés)
+-- Történelmi alapok kvíz kérdései
+INSERT INTO Kerdes (szoveg, nehezsegi_szint, idokorlat, kviz_id) VALUES ('Melyik évben volt a mohácsi csata?', 2, 30, 1);
+INSERT INTO Kerdes (szoveg, nehezsegi_szint, idokorlat, kviz_id) VALUES ('Ki volt Magyarország első királya?', 1, 20, 1);
+INSERT INTO Kerdes (szoveg, nehezsegi_szint, idokorlat, kviz_id) VALUES ('Melyik évben tört ki az 1848-as forradalom Magyarországon?', 2, 30, 1);
+
+-- Matematikai kihívás kvíz kérdései
+INSERT INTO Kerdes (szoveg, nehezsegi_szint, idokorlat, kviz_id) VALUES ('Mennyi 5! (5 faktoriális) értéke?', 2, 40, 2);
+INSERT INTO Kerdes (szoveg, nehezsegi_szint, idokorlat, kviz_id) VALUES ('Mi a Pitagorasz-tétel?', 2, 45, 2);
+INSERT INTO Kerdes (szoveg, nehezsegi_szint, idokorlat, kviz_id) VALUES ('Ha x² + 4x + 4 = 0, mennyi x értéke?', 3, 60, 2);
+
+-- Irodalmi barangolás kvíz kérdései
+INSERT INTO Kerdes (szoveg, nehezsegi_szint, idokorlat, kviz_id) VALUES ('Ki írta Az ember tragédiája című művet?', 1, 20, 3);
+INSERT INTO Kerdes (szoveg, nehezsegi_szint, idokorlat, kviz_id) VALUES ('Melyik Shakespeare-dráma főszereplője Hamlet?', 1, 25, 3);
+INSERT INTO Kerdes (szoveg, nehezsegi_szint, idokorlat, kviz_id) VALUES ('Ki írta a Nemecsek karaktert tartalmazó regényt?', 2, 30, 3);
+
+-- Földrajzi felfedezések kvíz kérdései
+INSERT INTO Kerdes (szoveg, nehezsegi_szint, idokorlat, kviz_id) VALUES ('Melyik a Föld legmagasabb hegycsúcsa?', 1, 20, 4);
+INSERT INTO Kerdes (szoveg, nehezsegi_szint, idokorlat, kviz_id) VALUES ('Melyik tenger választja el Európát Afrikától?', 1, 25, 4);
+INSERT INTO Kerdes (szoveg, nehezsegi_szint, idokorlat, kviz_id) VALUES ('Melyik a világ legnépesebb országa?', 1, 20, 4);
+
+-- IT szakértő kvíz kérdései
+INSERT INTO Kerdes (szoveg, nehezsegi_szint, idokorlat, kviz_id) VALUES ('Mit jelent a HTML rövidítés?', 1, 30, 5);
+INSERT INTO Kerdes (szoveg, nehezsegi_szint, idokorlat, kviz_id) VALUES ('Mi a SQL elsődleges felhasználási területe?', 2, 40, 5);
+INSERT INTO Kerdes (szoveg, nehezsegi_szint, idokorlat, kviz_id) VALUES ('Melyik nem programozási nyelv az alábbiak közül?', 1, 25, 5);
+
+-- Biológiai sokszínűség kvíz kérdései
+INSERT INTO Kerdes (szoveg, nehezsegi_szint, idokorlat, kviz_id) VALUES ('Milyen sejtalkotó tartalmazza a DNS-t?', 2, 30, 6);
+INSERT INTO Kerdes (szoveg, nehezsegi_szint, idokorlat, kviz_id) VALUES ('Mi a fotoszintézis alapanyaga?', 2, 35, 6);
+INSERT INTO Kerdes (szoveg, nehezsegi_szint, idokorlat, kviz_id) VALUES ('Melyik nem tartozik az emlősök közé?', 1, 20, 6);
+
+-- Művészeti stílusok kvíz kérdései
+INSERT INTO Kerdes (szoveg, nehezsegi_szint, idokorlat, kviz_id) VALUES ('Ki festette a Mona Lisa-t?', 1, 20, 7);
+INSERT INTO Kerdes (szoveg, nehezsegi_szint, idokorlat, kviz_id) VALUES ('Melyik művészeti stílus jellemző a 17. századra?', 2, 30, 7);
+INSERT INTO Kerdes (szoveg, nehezsegi_szint, idokorlat, kviz_id) VALUES ('Ki volt Salvador Dalí?', 1, 25, 7);
+
+-- Sporttörténet kvíz kérdései
+INSERT INTO Kerdes (szoveg, nehezsegi_szint, idokorlat, kviz_id) VALUES ('Melyik évben rendezték az első újkori olimpiai játékokat?', 2, 30, 8);
+INSERT INTO Kerdes (szoveg, nehezsegi_szint, idokorlat, kviz_id) VALUES ('Hány játékos van egy futballcsapatban a pályán?', 1, 15, 8);
+INSERT INTO Kerdes (szoveg, nehezsegi_szint, idokorlat, kviz_id) VALUES ('Melyik sportban használnak tollaslabdát?', 1, 15, 8);
+
+-- Valasz tábla (96 válasz - minden kérdéshez 4 válasz)
+-- Történelmi alapok kvíz válaszai
+-- 1. kérdés (Mohácsi csata)
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (1, '1526', 1);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (1, '1456', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (1, '1686', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (1, '1541', 0);
+
+-- 2. kérdés (Első király)
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (2, 'Szent István', 1);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (2, 'Szent László', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (2, 'Könyves Kálmán', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (2, 'IV. Béla', 0);
+
+-- 3. kérdés (1848-as forradalom)
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (3, '1848', 1);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (3, '1956', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (3, '1867', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (3, '1703', 0);
+
+-- Matematikai kihívás kvíz válaszai
+-- 4. kérdés (5 faktoriális)
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (4, '120', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (4, '24', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (4, '720', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (4, '120', 1);
+
+-- 5. kérdés (Pitagorasz-tétel)
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (5, 'a² + b² = c²', 1);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (5, 'a + b = c', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (5, 'a * b = c', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (5, 'a / b = c', 0);
+
+-- 6. kérdés (Egyenlet)
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (6, '-2', 1);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (6, '2', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (6, '4', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (6, '-4', 0);
+
+-- Irodalmi barangolás kvíz válaszai
+-- 7. kérdés (Az ember tragédiája)
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (7, 'Madách Imre', 1);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (7, 'Petőfi Sándor', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (7, 'Arany János', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (7, 'Jókai Mór', 0);
+
+-- 8. kérdés (Hamlet)
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (8, 'Hamlet', 1);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (8, 'Macbeth', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (8, 'Rómeó és Júlia', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (8, 'Othello', 0);
+
+-- 9. kérdés (Nemecsek)
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (9, 'Molnár Ferenc', 1);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (9, 'Jókai Mór', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (9, 'Gárdonyi Géza', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (9, 'Móricz Zsigmond', 0);
+
+-- Földrajzi felfedezések kvíz válaszai
+-- 10. kérdés (Legmagasabb hegycsúcs)
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (10, 'Mount Everest', 1);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (10, 'K2', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (10, 'Mont Blanc', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (10, 'Kilimandzsáró', 0);
+
+-- 11. kérdés (Tenger Európa és Afrika között)
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (11, 'Földközi-tenger', 1);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (11, 'Fekete-tenger', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (11, 'Vörös-tenger', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (11, 'Balti-tenger', 0);
+
+-- 12. kérdés (Legnépesebb ország)
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (12, 'Kína', 1);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (12, 'India', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (12, 'Egyesült Államok', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (12, 'Brazília', 0);
+
+-- IT szakértő kvíz válaszai
+-- 13. kérdés (HTML jelentése)
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (13, 'HyperText Markup Language', 1);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (13, 'High Technology Modern Language', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (13, 'Hyper Transfer Machine Learning', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (13, 'Home Tool Markup Language', 0);
+
+-- 14. kérdés (SQL felhasználás)
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (14, 'Adatbázis-kezelés', 1);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (14, 'Webdesign', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (14, 'Hálózati protokoll', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (14, 'Képszerkesztés', 0);
+
+-- 15. kérdés (Nem programozási nyelv)
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (15, 'HTML', 1);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (15, 'Python', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (15, 'Java', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (15, 'C++', 0);
+
+-- Biológiai sokszínűség kvíz válaszai
+-- 16. kérdés (DNS tartalmazó sejtalkotó)
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (16, 'Sejtmag', 1);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (16, 'Golgi-készülék', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (16, 'Riboszóma', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (16, 'Endoplazmatikus retikulum', 0);
+
+-- 17. kérdés (Fotoszintézis alapanyaga)
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (17, 'Szén-dioxid és víz', 1);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (17, 'Oxigén és glükóz', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (17, 'Nitrogén és hidrogén', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (17, 'Hidrogén és oxigén', 0);
+
+-- 18. kérdés (Nem emlős)
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (18, 'Krokodil', 1);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (18, 'Delfin', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (18, 'Denevér', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (18, 'Bálna', 0);
+
+-- Művészeti stílusok kvíz válaszai
+-- 19. kérdés (Mona Lisa)
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (19, 'Leonardo da Vinci', 1);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (19, 'Michelangelo', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (19, 'Raffaello', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (19, 'Botticelli', 0);
+
+-- 20. kérdés (17. századi művészeti stílus)
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (20, 'Barokk', 1);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (20, 'Reneszánsz', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (20, 'Klasszicizmus', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (20, 'Romantika', 0);
+
+-- 21. kérdés (Salvador Dalí)
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (21, 'Szürrealista festő', 1);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (21, 'Impresszionista zeneszerző', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (21, 'Reneszánsz szobrász', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (21, 'Romantikus költő', 0);
+
+-- Sporttörténet kvíz válaszai
+-- 22. kérdés (Első újkori olimpia)
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (22, '1896', 1);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (22, '1900', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (22, '1924', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (22, '1936', 0);
+
+-- 23. kérdés (Futballcsapat létszáma)
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (23, '11', 1);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (23, '10', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (23, '12', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (23, '9', 0);
+
+-- 24. kérdés (Tollaslabda)
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (24, 'Tollaslabda', 1);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (24, 'Asztalitenisz', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (24, 'Tenisz', 0);
+INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (24, 'Squash', 0);
+
+-- Kerdes_Temakor kapcsoló tábla (témakörök hozzárendelése kérdésekhez)
+-- Történelmi alapok kvíz kérdéseinek témái
+INSERT INTO Kerdes_Temakor (kerdes_id, temakor_id) VALUES (1, 1);
+INSERT INTO Kerdes_Temakor (kerdes_id, temakor_id) VALUES (2, 1);
+INSERT INTO Kerdes_Temakor (kerdes_id, temakor_id) VALUES (3, 1);
+
+-- Matematikai kihívás kvíz kérdéseinek témái
+INSERT INTO Kerdes_Temakor (kerdes_id, temakor_id) VALUES (4, 2);
+INSERT INTO Kerdes_Temakor (kerdes_id, temakor_id) VALUES (5, 2);
+INSERT INTO Kerdes_Temakor (kerdes_id, temakor_id) VALUES (6, 2);
+
+-- Irodalmi barangolás kvíz kérdéseinek témái
+INSERT INTO Kerdes_Temakor (kerdes_id, temakor_id) VALUES (7, 3);
+INSERT INTO Kerdes_Temakor (kerdes_id, temakor_id) VALUES (8, 3);
+INSERT INTO Kerdes_Temakor (kerdes_id, temakor_id) VALUES (9, 3);
+
+-- Földrajzi felfedezések kvíz kérdéseinek témái
+INSERT INTO Kerdes_Temakor (kerdes_id, temakor_id) VALUES (10, 4);
+INSERT INTO Kerdes_Temakor (kerdes_id, temakor_id) VALUES (11, 4);
+INSERT INTO Kerdes_Temakor (kerdes_id, temakor_id) VALUES (12, 4);
+
+-- IT szakértő kvíz kérdéseinek témái
+INSERT INTO Kerdes_Temakor (kerdes_id, temakor_id) VALUES (13, 6);
+INSERT INTO Kerdes_Temakor (kerdes_id, temakor_id) VALUES (14, 6);
+INSERT INTO Kerdes_Temakor (kerdes_id, temakor_id) VALUES (15, 6);
+
+-- Biológiai sokszínűség kvíz kérdéseinek témái
+INSERT INTO Kerdes_Temakor (kerdes_id, temakor_id) VALUES (16, 5);
+INSERT INTO Kerdes_Temakor (kerdes_id, temakor_id) VALUES (17, 5);
+INSERT INTO Kerdes_Temakor (kerdes_id, temakor_id) VALUES (18, 5);
+
+-- Művészeti stílusok kvíz kérdéseinek témái
+INSERT INTO Kerdes_Temakor (kerdes_id, temakor_id) VALUES (19, 9);
+INSERT INTO Kerdes_Temakor (kerdes_id, temakor_id) VALUES (20, 9);
+INSERT INTO Kerdes_Temakor (kerdes_id, temakor_id) VALUES (21, 9);
+
+-- Sporttörténet kvíz kérdéseinek témái
+INSERT INTO Kerdes_Temakor (kerdes_id, temakor_id) VALUES (22, 10);
+INSERT INTO Kerdes_Temakor (kerdes_id, temakor_id) VALUES (23, 10);
+INSERT INTO Kerdes_Temakor (kerdes_id, temakor_id) VALUES (24, 10);
+
+-- Jatekszoba tábla (5 játékszoba)
+INSERT INTO Jatekszoba (nev, felhasznalo_id, max_jatekos, aktiv_allapot, letrehozas_datum, kviz_id) VALUES ('Történelem rajongók', 1, 10, 1, TO_DATE('2023-09-01', 'YYYY-MM-DD'), 1);
+INSERT INTO Jatekszoba (nev, felhasznalo_id, max_jatekos, aktiv_allapot, letrehozas_datum, kviz_id) VALUES ('Matek bajnokok', 2, 8, 1, TO_DATE('2023-09-05', 'YYYY-MM-DD'), 2);
+INSERT INTO Jatekszoba (nev, felhasznalo_id, max_jatekos, aktiv_allapot, letrehozas_datum, kviz_id) VALUES ('Irodalom kedvelők', 5, 12, 1, TO_DATE('2023-09-10', 'YYYY-MM-DD'), 3);
+INSERT INTO Jatekszoba (nev, felhasznalo_id, max_jatekos, aktiv_allapot, letrehozas_datum, kviz_id) VALUES ('IT Szakik', 1, 6, 1, TO_DATE('2023-09-15', 'YYYY-MM-DD'), 5);
+INSERT INTO Jatekszoba (nev, felhasznalo_id, max_jatekos, aktiv_allapot, letrehozas_datum, kviz_id) VALUES ('Sport fanatikusok', 5, 10, 1, TO_DATE('2023-09-20', 'YYYY-MM-DD'), 8);
 
 -- Statisztika tábla
 INSERT INTO Statisztika (felhasznalo_id, kviz_id, atlagos_kitoltesi_ido, helyes_valaszok_aranya) VALUES (1, 1, 120, 80);
@@ -434,27 +693,6 @@ INSERT INTO Ranglista (felhasznalo_id, osszpontszam) VALUES (6, 620);
 INSERT INTO Ranglista (felhasznalo_id, osszpontszam) VALUES (7, 580);
 INSERT INTO Ranglista (felhasznalo_id, osszpontszam) VALUES (8, 560);
 
--- Jatekszoba tábla
-INSERT INTO Jatekszoba (nev, felhasznalo_id, max_jatekos, kviz_id) VALUES ('Történelem Szoba', 1, 10, 3);
-INSERT INTO Jatekszoba (nev, felhasznalo_id, max_jatekos, kviz_id) VALUES ('Tudományos Szoba', 4, 15, 3);
-INSERT INTO Jatekszoba (nev, felhasznalo_id, max_jatekos, kviz_id) VALUES ('Művészet Szoba', 7, 8, 3);
-INSERT INTO Jatekszoba (nev, felhasznalo_id, max_jatekos, kviz_id) VALUES ('Földrajz Szoba', 1, 12, 3);
-INSERT INTO Jatekszoba (nev, felhasznalo_id, max_jatekos, kviz_id) VALUES ('Irodalom Szoba', 4, 10, 3);
-
--- Temakor tábla
-INSERT INTO Temakor (nev) VALUES ('Történelem');
-INSERT INTO Temakor (nev) VALUES ('Tudomány');
-INSERT INTO Temakor (nev) VALUES ('Művészet');
-INSERT INTO Temakor (nev) VALUES ('Földrajz');
-INSERT INTO Temakor (nev) VALUES ('Irodalom');
-
--- Kerdes tábla
-INSERT INTO Kerdes (szoveg, nehezsegi_szint, idokorlat, kviz_id) VALUES ('Mikor volt az első világháború?', 2, 30, 1);
-INSERT INTO Kerdes (szoveg, nehezsegi_szint, idokorlat, kviz_id) VALUES ('Ki fedezte fel a gravitációt?', 2, 30, 2);
-INSERT INTO Kerdes (szoveg, nehezsegi_szint, idokorlat, kviz_id) VALUES ('Ki festette a Mona Lisát?', 2, 25, 3);
-INSERT INTO Kerdes (szoveg, nehezsegi_szint, idokorlat, kviz_id) VALUES ('Mi a fővárosa Kanadának?', 1, 20, 4);
-INSERT INTO Kerdes (szoveg, nehezsegi_szint, idokorlat, kviz_id) VALUES ('Ki írta a Rómeó és Júliát?', 2, 25, 5);
-
 -- Eredmeny tábla
 INSERT INTO Eredmeny (felhasznalo_id, kviz_id, pontszam) VALUES (1, 1, 80);
 INSERT INTO Eredmeny (felhasznalo_id, kviz_id, pontszam) VALUES (2, 1, 75);
@@ -465,33 +703,3 @@ INSERT INTO Eredmeny (felhasznalo_id, kviz_id, pontszam) VALUES (6, 3, 78);
 INSERT INTO Eredmeny (felhasznalo_id, kviz_id, pontszam) VALUES (7, 3, 88);
 INSERT INTO Eredmeny (felhasznalo_id, kviz_id, pontszam) VALUES (8, 4, 82);
 INSERT INTO Eredmeny (felhasznalo_id, kviz_id, pontszam) VALUES (2, 5, 76);
-
--- Valasz tábla
-INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (1, '1914-1918', 1);
-INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (1, '1939-1945', 0);
-INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (1, '1870-1914', 0);
-INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (1, '1900-1914', 0);
-INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (2, 'Newton', 1);
-INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (2, 'Einstein', 0);
-INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (2, 'Galileo', 0);
-INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (2, 'Kepler', 0);
-INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (3, 'Leonardo da Vinci', 1);
-INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (3, 'Pablo Picasso', 0);
-INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (3, 'Vincent van Gogh', 0);
-INSERT INTO Valasz (kerdes_id, szoveg, helyes) VALUES (3, 'Claude Monet', 0);
-
--- Kerdes_Temakor kapcsoló tábla
-INSERT INTO Kerdes_Temakor (kerdes_id, temakor_id) VALUES (1, 1);
-INSERT INTO Kerdes_Temakor (kerdes_id, temakor_id) VALUES (2, 2);
-INSERT INTO Kerdes_Temakor (kerdes_id, temakor_id) VALUES (3, 3);
-INSERT INTO Kerdes_Temakor (kerdes_id, temakor_id) VALUES (4, 4);
-INSERT INTO Kerdes_Temakor (kerdes_id, temakor_id) VALUES (5, 5);
-
--- Jatekszoba_Csatlakozas tábla
-INSERT INTO Jatekszoba_Csatlakozas (jatekszoba_id, felhasznalo_id) VALUES (1, 2);
-INSERT INTO Jatekszoba_Csatlakozas (jatekszoba_id, felhasznalo_id) VALUES (1, 3);
-INSERT INTO Jatekszoba_Csatlakozas (jatekszoba_id, felhasznalo_id) VALUES (2, 4);
-INSERT INTO Jatekszoba_Csatlakozas (jatekszoba_id, felhasznalo_id) VALUES (3, 5);
-INSERT INTO Jatekszoba_Csatlakozas (jatekszoba_id, felhasznalo_id) VALUES (3, 6);
-INSERT INTO Jatekszoba_Csatlakozas (jatekszoba_id, felhasznalo_id) VALUES (4, 7);
-INSERT INTO Jatekszoba_Csatlakozas (jatekszoba_id, felhasznalo_id) VALUES (5, 8);
