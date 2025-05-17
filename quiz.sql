@@ -241,19 +241,13 @@ BEGIN
 END;
 /
 
-CREATE SEQUENCE seq_kviz_befejezes_log
-START WITH 1
-INCREMENT BY 1
-NOCACHE
-NOCYCLE;
-
 CREATE OR REPLACE TRIGGER trg_kviz_befejezes_log
 AFTER INSERT ON Eredmeny
 FOR EACH ROW
 BEGIN
     INSERT INTO Kviz_Befejezes_Log (id, felhasznalo_id, kviz_id, pontszam, jatekszoba_id, idobelyeg)
     VALUES (
-        seq_kviz_befejezes_log.NEXTVAL,
+        NVL((SELECT MAX(ID)+1 FROM Kviz_Befejezes_Log), 1),
         :NEW.felhasznalo_id, 
         :NEW.kviz_id, 
         :NEW.pontszam, 
@@ -263,19 +257,13 @@ BEGIN
 END;
 /
 
-CREATE SEQUENCE seq_kviz_letrehozas_log
-START WITH 1
-INCREMENT BY 1
-NOCACHE
-NOCYCLE;
-
 CREATE OR REPLACE TRIGGER trg_kviz_letrehozas
 AFTER INSERT ON Kviz
 FOR EACH ROW
 BEGIN
     INSERT INTO Kviz_Letrehozas_Log (id, kviz_id, nev)
     VALUES (
-        seq_kviz_letrehozas_log.NEXTVAL,
+        (SELECT NVL(MAX(ID), 1)+1 FROM Kviz_Letrehozas_Log),
         :NEW.id, 
         :NEW.nev
     );

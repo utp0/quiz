@@ -672,8 +672,10 @@ class DbFunctions {
                 let asd = qi.toString() == correctIndex.toString();
                 let valasz = tomb[qi];
                 console.log(valasz);
-                await DbFunctions.dbInstance().execute(qsql, [kindex, valasz, asd ? 1 : 0]);
+                const mivanitt = await DbFunctions.dbInstance().execute(qsql, [kindex, valasz, asd ? 1 : 0]);
+                console.debug(mivanitt);
             }
+            await DbFunctions.dbInstance().commit();
 
             console.log(`Új kérdés létrehozva: ${szoveg}`);
         } catch (e) {
