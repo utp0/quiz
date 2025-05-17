@@ -421,6 +421,14 @@ INSERT INTO Temakor (nev) VALUES ('Művészet');
 INSERT INTO Temakor (nev) VALUES ('Sport');
 
 -- Kviz tábla (8 kvíz)
+SET DEFINE OFF;
+DELETE FROM KVIZ WHERE ID = 99999 OR NEV = '-- kategorizálatlan --';
+COMMIT;
+Insert into KVIZ (ID,NEV,LEIRAS,LETREHOZAS_DATUMA,FELHASZNALO_ID) values (99999,'-- kategorizálatlan --',null,to_date('16-MAY-25','DD-MON-RR'),17);
+COMMIT;
+UPDATE KVIZ SET ID = 99999 WHERE NEV = '-- kategorizálatlan --';
+COMMIT;
+SET DEFINE ON;
 INSERT INTO Kviz (nev, leiras, letrehozas_datuma, felhasznalo_id) VALUES ('Történelmi alapok', 'Alap történelmi ismereteket mérő kvíz.', TO_DATE('2023-01-15', 'YYYY-MM-DD'), 1);
 INSERT INTO Kviz (nev, leiras, letrehozas_datuma, felhasznalo_id) VALUES ('Matematikai kihívás', 'Középszintű matematikai feladatok.', TO_DATE('2023-02-10', 'YYYY-MM-DD'), 2);
 INSERT INTO Kviz (nev, leiras, letrehozas_datuma, felhasznalo_id) VALUES ('Irodalmi barangolás', 'Magyar és világirodalmi kérdések.', TO_DATE('2023-03-05', 'YYYY-MM-DD'), 5);
