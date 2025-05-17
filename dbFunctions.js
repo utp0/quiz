@@ -970,6 +970,26 @@ class DbFunctions {
         }
     }
 
+    static async getLastLogin(userId = 0) {
+        if (userId == 0) throw Error("userId megadása szükséges!");
+        const sql = `SELECT DATUM FROM LOGINLOG WHERE FELHASZNALO_ID = :id ORDER BY DATUM DESC`;
+        const result = await DbFunctions.dbInstance().execute(sql,
+            { "id": userId },
+            { outFormat: oracledb.OUT_FORMAT_OBJECT }
+        );
+        if (result.rows.length > 0)
+            return new Date(result.rows[0]["DATUM"]);
+        return new Date(0);
+    }
+
+    static async getAllLastLogins() {
+        const sql = "SELECT FELHASZNALO_ID, DATUM FROM LOGINLOG ORDER BY DATUM DESC";
+        const result = await DbFunctions.dbInstance().execute(
+            sql, [], { outFormat: oracledb.OUT_FORMAT_OBJECT }
+        );
+        return result.rows ?? null;
+    }
+
 }
 
 module.exports = DbFunctions;

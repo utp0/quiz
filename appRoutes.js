@@ -879,11 +879,13 @@ app.post("/jatekszoba/:id", requireLogin, isAdmin, async (req, res) => {
 });
 
 app.get("/admin_userlist", requireLogin, isAdmin, async (req, res) => {
-    const userrows = await DbFunctions.getAllUsers();
+    let userrows = await DbFunctions.getAllUsers();
+    const logins = await DbFunctions.getAllLastLogins();
     return res.render("main", {
         page: "partial/admin_userlist",
         title: "Felhasználók kezelése",
-        users: userrows ?? null
+        users: userrows ?? null,
+        logins: logins ?? null
     });
 });
 
