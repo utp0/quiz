@@ -1,6 +1,8 @@
 # abalapú Quiz
 
-Futtatés fejlesztői módban:
+Futtatás előtt érdemes a `.env.default` fájl mintájára egy (új) `.env` fájlban felülírni a szükséges környezeti változókat.
+
+Futtatás:
 
 ```sh
 npm install
