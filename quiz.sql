@@ -416,7 +416,7 @@ AFTER INSERT ON Kerdes
 FOR EACH ROW
 BEGIN
     INSERT INTO Kerdes_Letrehozas_Log (id, kerdes_id, szoveg)
-    VALUES (NVL((SELECT MAX(ID)+1 FROM Kerdes_Letrehozas_Log), 1), :NEW.id, :NEW.szoveg);
+    VALUES ((SELECT NVL(MAX(ID), 1)+1 FROM kerdes_letrehozas_log), :NEW.id, :NEW.szoveg);
 END;
 /
 
