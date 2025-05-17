@@ -247,7 +247,7 @@ FOR EACH ROW
 BEGIN
     INSERT INTO Kviz_Befejezes_Log (id, felhasznalo_id, kviz_id, pontszam, jatekszoba_id, idobelyeg)
     VALUES (
-        NVL((SELECT MAX(ID)+1 FROM Kviz_Befejezes_Log), 1),
+        (SELECT NVL(MAX(ID), 1)+1 FROM Kviz_Befejezes_Log),
         :NEW.felhasznalo_id, 
         :NEW.kviz_id, 
         :NEW.pontszam, 
