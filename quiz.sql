@@ -43,6 +43,9 @@ DROP TABLE LOGINLOG CASCADE CONSTRAINTS;
 
 DROP TABLE FELHASZNALO_SZOBA_CSATLAKOZAS CASCADE CONSTRAINTS;
 
+DROP TRIGGER trg_kviz_befejezes_log;
+DROP TABLE Kviz_Befejezes_Log CASCADE CONSTRAINTS;
+
 DROP SEQUENCE hiba_naplo_seq;
 DROP PROCEDURE NAPLOZO_HIBA;
 DROP TABLE HIBA_NAPLO;
@@ -170,6 +173,18 @@ CREATE TABLE HIBA_NAPLO (
     egyeb_info VARCHAR2(1000)
 );
 
+CREATE TABLE Kviz_Befejezes_Log (
+    id NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    felhasznalo_id NUMBER NOT NULL,
+    kviz_id NUMBER NOT NULL,
+    pontszam NUMBER NOT NULL,
+    jatekszoba_id NUMBER,
+    idobelyeg TIMESTAMP DEFAULT SYSTIMESTAMP,
+    
+    FOREIGN KEY (felhasznalo_id) REFERENCES Felhasznalo(id),
+    FOREIGN KEY (kviz_id) REFERENCES Kviz(id),
+    FOREIGN KEY (jatekszoba_id) REFERENCES Jatekszoba(id)
+);
 
 -- sequencek, triggerek
 
@@ -202,6 +217,15 @@ BEGIN
   SELECT statisztika_seq.NEXTVAL
   INTO :NEW.id
   FROM dual;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trg_kviz_befejezes_log
+AFTER INSERT ON Eredmeny
+FOR EACH ROW
+BEGIN
+    INSERT INTO Kviz_Befejezes_Log (felhasznalo_id, kviz_id, pontszam, jatekszoba_id, idobelyeg)
+    VALUES (:NEW.felhasznalo_id, :NEW.kviz_id, :NEW.pontszam, :NEW.jatekszoba_id, :NEW.idobelyeg);
 END;
 /
 
