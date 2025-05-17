@@ -50,6 +50,9 @@ DROP SEQUENCE hiba_naplo_seq;
 DROP PROCEDURE NAPLOZO_HIBA;
 DROP TABLE HIBA_NAPLO;
 
+DROP TRIGGER trg_kviz_letrehozas;
+DROP TABLE Kviz_Letrehozas_Log CASCADE CONSTRAINTS;
+
 
 --tábladefiníciók
 
@@ -186,6 +189,13 @@ CREATE TABLE Kviz_Befejezes_Log (
     FOREIGN KEY (jatekszoba_id) REFERENCES Jatekszoba(id)
 );
 
+CREATE TABLE Kviz_Letrehozas_Log (
+    id NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    kviz_id NUMBER NOT NULL,
+    nev VARCHAR2(255),
+    letrehozas_ideje TIMESTAMP DEFAULT SYSTIMESTAMP
+);
+
 -- sequencek, triggerek
 
 CREATE SEQUENCE felhasznalo_seq
@@ -226,6 +236,15 @@ FOR EACH ROW
 BEGIN
     INSERT INTO Kviz_Befejezes_Log (felhasznalo_id, kviz_id, pontszam, jatekszoba_id, idobelyeg)
     VALUES (:NEW.felhasznalo_id, :NEW.kviz_id, :NEW.pontszam, :NEW.jatekszoba_id, :NEW.idobelyeg);
+END;
+/
+
+CREATE OR REPLACE TRIGGER trg_kviz_letrehozas
+AFTER INSERT ON Kviz
+FOR EACH ROW
+BEGIN
+    INSERT INTO Kviz_Letrehozas_Log (kviz_id, nev)
+    VALUES (:NEW.id, :NEW.nev);
 END;
 /
 
