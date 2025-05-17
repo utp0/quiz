@@ -1,4 +1,4 @@
-<body>
+<body style="max-width: fit-content;">
     <% if(!locals.users){
         %>
     <p style="color: rgb(255, 95, 95);">Felhasználólista lekérése sikertelen.</p>
@@ -8,6 +8,7 @@
         <thead>
             <th>id</th>
             <th>Felhasználónév</th>
+            <th>Utolsó belépés</th>
             <th>Email cím</th>
             <th>Születési év</th>
             <th>Jogosultság</th>
@@ -19,6 +20,14 @@
             <tr>
                 <td><%= element["ID"] %></td>
                 <td><a href="/profile?id=<%=element["ID"]%>"><%= element["FELHASZNALONEV"] %></a></td>
+                <td><%
+                    for(let i = 0; i < locals.logins.length; i++) {
+                        if(locals.logins[i]["FELHASZNALO_ID"] == element["ID"]) {
+                            %><%= (new Date(locals.logins[i]["DATUM"])).toLocaleDateString() %><%
+                            break;
+                        }
+                    }
+                    %></td>
                 <td><%= element["EMAIL"] %></td>
                 <td><%= element["SZULETESI_EV"] %></td>
                 <td><%= element["JOGOSULTSAG"] %></td>
