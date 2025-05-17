@@ -269,6 +269,9 @@ BEGIN
 END;
 /
 
+-- kikapcs, insert-nél van MAX(ID)+1 inkább
+ALTER TRIGGER kviz_bir DISABLE;
+
 CREATE SEQUENCE kerdes_seq
 START WITH 1
 INCREMENT BY 1
@@ -397,16 +400,16 @@ END;
 -- Példaadatok beszúrása
 
 -- Felhasznalo tábla (10 felhasználó)
-INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('admin', 'admin@quiz.hu', 'admin123', 1990, 'admin');
-INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('tanar2', 'tanar1@quiz.hu', 'tanar123', 1985, 'admin');
-INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('diák1', 'diak1@quiz.hu', 'diak123', 2000, 'felhasznalo');
-INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('diák2', 'diak2@quiz.hu', 'jelszo123', 2001, 'felhasznalo');
-INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('kvízmester', 'kvizmester@quiz.hu', 'kviz123', 1992, 'admin');
-INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('jatekos1', 'jatekos1@gmail.com', 'jelszo456', 1995, 'felhasznalo');
-INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('jatekos2', 'jatekos2@gmail.com', 'pass789', 1998, 'felhasznalo');
-INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('oktatási_szakértő', 'oktato@quiz.hu', 'oktato123', 1980, 'admin');
-INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('vendég', 'vendeg@gmail.com', 'vendeg123', 2002, 'felhasznalo');
-INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('teszt_user', 'teszt@quiz.hu', 'teszt123', 1997, 'felhasznalo');
+INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('admin', 'admin@quiz.hu', '$2b$10$i6bQyf3R.1YMb8DS3qwfLe0upfzAgQXBwaw8RbQJaCUZJQEBZ6LQy', 1990, 'admin');  -- admin123
+INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('tanar2', 'tanar1@quiz.hu', '$2b$10$atvZXh4uPml1alkaD75PI.tGQHCcaDF37AmzcnhxKkiynBchhQRDS', 1985, 'admin');  -- tanar123
+INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('diák1', 'diak1@quiz.hu', '$2b$10$5rvuHgGHhvmqqsdksuoa.eaxW0PqSyr9hQYgIpeCNprv2Yyl0qAAO', 2000, 'felhasznalo');  -- diak123
+INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('diák2', 'diak2@quiz.hu', '$2b$10$XSP7y75NFXLzv5.XA0/eB.QtboYeCu6a.F2GtEGUM09CKVLZnLJ5m', 2001, 'felhasznalo');  -- asd
+INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('kvízmester', 'kvizmester@quiz.hu', '$2b$10$XSP7y75NFXLzv5.XA0/eB.QtboYeCu6a.F2GtEGUM09CKVLZnLJ5m', 1992, 'admin');  -- asd
+INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('jatekos1', 'jatekos1@gmail.com', '$2b$10$SefawZwpzgz7ImFdLS8U4OruZWzYBFbt3qiwhAOIJIqg6A8kvOj4K', 1995, 'felhasznalo');  -- jelszo456
+INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('jatekos2', 'jatekos2@gmail.com', '$2b$10$XSP7y75NFXLzv5.XA0/eB.QtboYeCu6a.F2GtEGUM09CKVLZnLJ5m', 1998, 'felhasznalo');  -- asd
+INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('oktatási_szakértő', 'oktato@quiz.hu', '$2b$10$XSP7y75NFXLzv5.XA0/eB.QtboYeCu6a.F2GtEGUM09CKVLZnLJ5m', 1980, 'admin');  -- asd
+INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('vendég', 'vendeg@gmail.com', '$2b$10$XSP7y75NFXLzv5.XA0/eB.QtboYeCu6a.F2GtEGUM09CKVLZnLJ5m', 2002, 'felhasznalo');  -- asd
+INSERT INTO Felhasznalo (felhasznalonev, email, jelszo, szuletesi_ev, jogosultsag) VALUES ('teszt_user', 'teszt@quiz.hu', '$2b$10$XSP7y75NFXLzv5.XA0/eB.QtboYeCu6a.F2GtEGUM09CKVLZnLJ5m', 1997, 'felhasznalo');  -- asd
 
 -- Temakor tábla (10 témakör)
 INSERT INTO Temakor (nev) VALUES ('Történelem');
@@ -421,22 +424,23 @@ INSERT INTO Temakor (nev) VALUES ('Művészet');
 INSERT INTO Temakor (nev) VALUES ('Sport');
 
 -- Kviz tábla (8 kvíz)
+INSERT INTO Kviz (id, nev, leiras, letrehozas_datuma, felhasznalo_id) VALUES (NVL((SELECT MAX(ID)+1 FROM KVIZ), 1), 'Történelmi alapok', 'Alap történelmi ismereteket mérő kvíz.', TO_DATE('2023-01-15', 'YYYY-MM-DD'), 1);
+INSERT INTO Kviz (id, nev, leiras, letrehozas_datuma, felhasznalo_id) VALUES ((SELECT MAX(ID)+1 FROM Kviz), 'Matematikai kihívás', 'Középszintű matematikai feladatok.', TO_DATE('2023-02-10', 'YYYY-MM-DD'), 2);
+INSERT INTO Kviz (id, nev, leiras, letrehozas_datuma, felhasznalo_id) VALUES ((SELECT MAX(ID)+1 FROM Kviz), 'Irodalmi barangolás', 'Magyar és világirodalmi kérdések.', TO_DATE('2023-03-05', 'YYYY-MM-DD'), 5);
+INSERT INTO Kviz (id, nev, leiras, letrehozas_datuma, felhasznalo_id) VALUES ((SELECT MAX(ID)+1 FROM Kviz), 'Földrajzi felfedezések', 'Utazz velünk a világban!', TO_DATE('2023-04-20', 'YYYY-MM-DD'), 8);
+INSERT INTO Kviz (id, nev, leiras, letrehozas_datuma, felhasznalo_id) VALUES ((SELECT MAX(ID)+1 FROM Kviz), 'IT szakértő', 'Informatikai alapismeretek tesztelése.', TO_DATE('2023-05-12', 'YYYY-MM-DD'), 1);
+INSERT INTO Kviz (id, nev, leiras, letrehozas_datuma, felhasznalo_id) VALUES ((SELECT MAX(ID)+1 FROM Kviz), 'Biológiai sokszínűség', 'Az élővilág csodái.', TO_DATE('2023-06-08', 'YYYY-MM-DD'), 2);
+INSERT INTO Kviz (id, nev, leiras, letrehozas_datuma, felhasznalo_id) VALUES ((SELECT MAX(ID)+1 FROM Kviz), 'Művészeti stílusok', 'Művészettörténeti kvíz.', TO_DATE('2023-07-22', 'YYYY-MM-DD'), 8);
+INSERT INTO Kviz (id, nev, leiras, letrehozas_datuma, felhasznalo_id) VALUES ((SELECT MAX(ID)+1 FROM Kviz), 'Sporttörténet', 'Érdekességek a sport világából.', TO_DATE('2023-08-15', 'YYYY-MM-DD'), 5);
+COMMIT;
 SET DEFINE OFF;
 DELETE FROM KVIZ WHERE ID = 99999 OR NEV = '-- kategorizálatlan --';
 COMMIT;
-Insert into KVIZ (ID,NEV,LEIRAS,LETREHOZAS_DATUMA,FELHASZNALO_ID) values (99999,'-- kategorizálatlan --',null,to_date('16-MAY-25','DD-MON-RR'),17);
+Insert into KVIZ (ID,NEV,LEIRAS,LETREHOZAS_DATUMA,FELHASZNALO_ID) values (99999,'-- kategorizálatlan --',null,to_date('16-MAY-25','DD-MON-RR'),1);
 COMMIT;
 UPDATE KVIZ SET ID = 99999 WHERE NEV = '-- kategorizálatlan --';
 COMMIT;
 SET DEFINE ON;
-INSERT INTO Kviz (nev, leiras, letrehozas_datuma, felhasznalo_id) VALUES ('Történelmi alapok', 'Alap történelmi ismereteket mérő kvíz.', TO_DATE('2023-01-15', 'YYYY-MM-DD'), 1);
-INSERT INTO Kviz (nev, leiras, letrehozas_datuma, felhasznalo_id) VALUES ('Matematikai kihívás', 'Középszintű matematikai feladatok.', TO_DATE('2023-02-10', 'YYYY-MM-DD'), 2);
-INSERT INTO Kviz (nev, leiras, letrehozas_datuma, felhasznalo_id) VALUES ('Irodalmi barangolás', 'Magyar és világirodalmi kérdések.', TO_DATE('2023-03-05', 'YYYY-MM-DD'), 5);
-INSERT INTO Kviz (nev, leiras, letrehozas_datuma, felhasznalo_id) VALUES ('Földrajzi felfedezések', 'Utazz velünk a világban!', TO_DATE('2023-04-20', 'YYYY-MM-DD'), 8);
-INSERT INTO Kviz (nev, leiras, letrehozas_datuma, felhasznalo_id) VALUES ('IT szakértő', 'Informatikai alapismeretek tesztelése.', TO_DATE('2023-05-12', 'YYYY-MM-DD'), 1);
-INSERT INTO Kviz (nev, leiras, letrehozas_datuma, felhasznalo_id) VALUES ('Biológiai sokszínűség', 'Az élővilág csodái.', TO_DATE('2023-06-08', 'YYYY-MM-DD'), 2);
-INSERT INTO Kviz (nev, leiras, letrehozas_datuma, felhasznalo_id) VALUES ('Művészeti stílusok', 'Művészettörténeti kvíz.', TO_DATE('2023-07-22', 'YYYY-MM-DD'), 8);
-INSERT INTO Kviz (nev, leiras, letrehozas_datuma, felhasznalo_id) VALUES ('Sporttörténet', 'Érdekességek a sport világából.', TO_DATE('2023-08-15', 'YYYY-MM-DD'), 5);
 
 -- Kerdes tábla (24 kérdés - kvízenként 3 kérdés)
 -- Történelmi alapok kvíz kérdései
@@ -711,3 +715,6 @@ INSERT INTO Eredmeny (felhasznalo_id, kviz_id, pontszam) VALUES (6, 3, 78);
 INSERT INTO Eredmeny (felhasznalo_id, kviz_id, pontszam) VALUES (7, 3, 88);
 INSERT INTO Eredmeny (felhasznalo_id, kviz_id, pontszam) VALUES (8, 4, 82);
 INSERT INTO Eredmeny (felhasznalo_id, kviz_id, pontszam) VALUES (2, 5, 76);
+
+
+COMMIT;

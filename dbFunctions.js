@@ -575,7 +575,7 @@ class DbFunctions {
     static async createKviz(nev, leiras, felhasznaloId) {
         const sql = `
             INSERT INTO Kviz (id, nev, leiras, letrehozas_datuma, felhasznalo_id)
-            VALUES (null, :1, :2, SYSDATE, :3)
+            VALUES ((SELECT MAX(ID)+1 FROM Kviz), :1, :2, SYSDATE, :3)
             RETURN ID INTO :id
         `;
         try {
