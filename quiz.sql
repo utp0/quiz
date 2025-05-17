@@ -53,6 +53,9 @@ DROP TABLE HIBA_NAPLO;
 DROP TRIGGER trg_kviz_letrehozas;
 DROP TABLE Kviz_Letrehozas_Log CASCADE CONSTRAINTS;
 
+DROP TRIGGER trg_kerdes_letrehozas;
+DROP TABLE Kerdes_Letrehozas_Log CASCADE CONSTRAINTS;
+
 
 --tábladefiníciók
 
@@ -177,7 +180,7 @@ CREATE TABLE HIBA_NAPLO (
 );
 
 CREATE TABLE Kviz_Befejezes_Log (
-    id NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id NUMBER PRIMARY KEY,
     felhasznalo_id NUMBER NOT NULL,
     kviz_id NUMBER NOT NULL,
     pontszam NUMBER NOT NULL,
@@ -190,11 +193,19 @@ CREATE TABLE Kviz_Befejezes_Log (
 );
 
 CREATE TABLE Kviz_Letrehozas_Log (
-    id NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id NUMBER PRIMARY KEY,
     kviz_id NUMBER NOT NULL,
     nev VARCHAR2(255),
     letrehozas_ideje TIMESTAMP DEFAULT SYSTIMESTAMP
 );
+
+CREATE TABLE Kerdes_Letrehozas_Log (
+    id NUMBER PRIMARY KEY,
+    kerdes_id NUMBER NOT NULL,
+    szoveg VARCHAR2(1000),
+    idobelyeg TIMESTAMP DEFAULT SYSTIMESTAMP
+);
+
 
 -- sequencek, triggerek
 
@@ -389,7 +400,14 @@ EXCEPTION
 END;
 /
 
-
+CREATE OR REPLACE TRIGGER trg_kerdes_letrehozas
+AFTER INSERT ON Kerdes
+FOR EACH ROW
+BEGIN
+    INSERT INTO Kerdes_Letrehozas_Log (kerdes_id, szoveg)
+    VALUES (:NEW.id, :NEW.szoveg);
+END;
+/
 
 -- funkciók
 
