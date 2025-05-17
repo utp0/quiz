@@ -508,7 +508,7 @@ COMMIT;
 SET DEFINE OFF;
 DELETE FROM KVIZ WHERE ID = 99999 OR NEV = '-- kategorizálatlan --';
 COMMIT;
-Insert into KVIZ (ID,NEV,LEIRAS,LETREHOZAS_DATUMA,FELHASZNALO_ID) values (99999,'-- kategorizálatlan --',null,to_date('16-MAY-25','DD-MON-RR'),1);
+Insert into KVIZ (ID,NEV,LEIRAS,LETREHOZAS_DATUMA,FELHASZNALO_ID) values (99999,'-- kategorizálatlan --',null,TO_DATE('2025-05-16', 'YYYY-MM-DD'),1);
 COMMIT;
 UPDATE KVIZ SET ID = 99999 WHERE NEV = '-- kategorizálatlan --';
 COMMIT;
